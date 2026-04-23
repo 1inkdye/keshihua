@@ -862,7 +862,7 @@ def render_dashboard():
 
             section = st.radio(
                 "查看内容",
-                ["总览", "学校分析", "任务与学生分析"],
+                ["总览", "学校层与老师层分析", "任务层与学生层分析"],
                 horizontal=True,
                 key="overview_section"
             )

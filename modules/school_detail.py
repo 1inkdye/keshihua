@@ -359,7 +359,7 @@ def render_school_detail_page(
             col_sort_label, col_sort_radio = st.columns([1, 4], vertical_alignment="center")
             with col_sort_label:
                 st.markdown(
-                    "<div style='font-size:14px;font-weight:600;color:#EAF1FF;'>排序方式</div>",
+                    "<div style='font-size:14px;font-weight:600;color:#000000;'>排序方式</div>",
                     unsafe_allow_html=True
                 )
             with col_sort_radio:
