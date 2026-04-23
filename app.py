@@ -422,6 +422,28 @@ def load_table_from_bytes(file_dict):
         return pd.read_csv(bio)
     return pd.read_excel(bio)
 
+@st.cache_data(show_spinner=False)
+def get_teacher_df(file_bytes):
+    return preprocess_teacher(load_table_from_bytes(file_bytes))
+
+
+@st.cache_data(show_spinner=False)
+def get_task_df(file_bytes):
+    return preprocess_task(load_table_from_bytes(file_bytes))
+
+
+@st.cache_data(show_spinner=False)
+def get_student_df(file_bytes):
+    STUDENT_COLS = [
+        "发布时间", "完成时间",
+        "老师邮箱", "老师姓名", "任务类型",
+        "学生姓名", "学员号", "学员任务状态",
+        "正确率", "做题数"
+    ]
+    raw = load_table_from_bytes(file_bytes)
+    keep_cols = [c for c in STUDENT_COLS if c in raw.columns]
+    return preprocess_student(raw[keep_cols])
+
 
 @st.cache_data(show_spinner=False)
 def load_all_data(
@@ -457,10 +479,10 @@ def load_all_data(
 
     # ================= 原始数据 =================
     if teacher_file_bytes is not None:
-        df_teacher_all = preprocess_teacher(load_table_from_bytes(teacher_file_bytes))
+        df_teacher_all = get_teacher_df(teacher_file_bytes)
 
     if task_file_bytes is not None:
-        df_task_all_raw = preprocess_task(load_table_from_bytes(task_file_bytes))
+        df_task_all_raw = get_task_df(task_file_bytes)
 
     if student_file_bytes is not None:
         STUDENT_COLS = [
@@ -473,7 +495,7 @@ def load_all_data(
         raw_student = load_table_from_bytes(student_file_bytes)
         # 只保留实际存在的列
         keep_cols = [c for c in STUDENT_COLS if c in raw_student.columns]
-        df_student_all = preprocess_student(raw_student[keep_cols])
+        df_student_all = get_student_df(student_file_bytes)
 
     # ================= 老师维表 + 任务挂维 =================
     if not df_teacher_all.empty:
@@ -482,21 +504,6 @@ def load_all_data(
     if not df_task_all_raw.empty:
         df_task_all = attach_teacher_dimension(df_task_all_raw, teacher_dim)
 
-    # ##debug
-    # if DEBUG_MODE:
-    #     st.caption(f"task_all_raw={len(df_task_all_raw)} | task_all={len(df_task_all)}")
-    #     if "任务发布时间" in df_task_all.columns:
-    #         st.caption(
-    #             f"任务发布时间最小={df_task_all['任务发布时间'].min()} | "
-    #             f"最大={df_task_all['任务发布时间'].max()}"
-    #         )
-    #     if "日期" in df_task_all.columns:
-    #         st.caption(
-    #             f"日期最小={df_task_all['日期'].min()} | "
-    #             f"最大={df_task_all['日期'].max()}"
-    #         )
-    #     else:
-    #         df_task_all = pd.DataFrame()
 
     # ================= 30天全集 =================
     if not df_task_all.empty:
@@ -574,7 +581,7 @@ def load_all_data(
 
 def reset_upload_state():
     st.session_state.uploaded = False
-
+    st.session_state.auto_aligned = False
     st.session_state.teacher_file = None
     st.session_state.task_file = None
     st.session_state.student_file = None
@@ -595,11 +602,21 @@ def reset_upload_state():
 # ================= 上传模式 =================
 def render_upload_mode():
     st.markdown("## 📂 上传数据")
-    st.info(
-        "请上传近30天老师数据、任务数据、学生数据。"
-        "系统会根据你选择的分析截止日期，自动切分：本周（上周五~本周四）和上周（上上周五~上周四），"
-        "并生成近30天趋势。"
-    )
+    st.markdown("""
+    <div style="
+    background:#EAF2FF;
+    padding:16px 18px;
+    border-radius:16px;
+    font-size:13px;
+    line-height:1.8;
+    color:#16324F;
+    white-space:normal;
+    word-break:break-word;
+    margin-bottom:12px;
+    ">
+    请上传近30天老师数据、任务数据、学生数据。系统会根据你选择的分析截止日期，自动切分：本周（上周五~本周四）和上周（上上周五~上周四），并生成近30天趋势。
+    </div>
+    """, unsafe_allow_html=True)
     c1, c2 = st.columns(2)
 
     with c1:
@@ -650,12 +667,26 @@ def render_upload_mode():
         st.session_state.task_file_bytes = file_to_bytes(task_file)
         st.session_state.student_file_bytes = file_to_bytes(student_file)
 
-        # 自动对齐分析截止日期到任务数据最大日期
-        task_preview = preprocess_task(load_table_from_bytes(st.session_state.task_file_bytes))
-        if not task_preview.empty and "任务发布时间" in task_preview.columns:
-            max_task_date = pd.to_datetime(task_preview["任务发布时间"], errors="coerce").max()
-            if pd.notna(max_task_date):
-                st.session_state.analysis_anchor_date = max_task_date.date()  # 现在可以正常赋值
+    # ===== 自动对齐分析日期（轻量 + 只执行一次）=====
+    if "auto_aligned" not in st.session_state:
+        raw_task = load_table_from_bytes(st.session_state.task_file_bytes)
+
+        if raw_task is not None and "任务发布时间" in raw_task.columns:
+            task_dates = pd.to_datetime(raw_task["任务发布时间"], errors="coerce")
+
+            if not task_dates.empty:
+                max_task_date = task_dates.max()
+
+                if pd.notna(max_task_date):
+                    st.session_state.analysis_anchor_date = max_task_date.date()
+
+        st.session_state.auto_aligned = True
+
+    if not task_dates.empty:
+        max_task_date = task_dates.max()
+
+        if pd.notna(max_task_date):
+            st.session_state.analysis_anchor_date = max_task_date.date()
 
         st.session_state.uploaded = True
         st.session_state.page_mode = "national"
