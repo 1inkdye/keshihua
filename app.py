@@ -878,7 +878,7 @@ def render_dashboard():
                     df_task_30d
                 )
 
-            elif section == "学校分析":
+            elif section == "学校层与老师层分析":
                 render_detail_analysis(
                     df_school_cur,
                     df_school_last,
@@ -887,7 +887,7 @@ def render_dashboard():
                     df_task_30d
                 )
 
-            elif section == "任务与学生分析":
+            elif section == "任务层与学生层分析":
                 render_task_student_analysis(
                     df_task_cur, df_task_last,
                     df_student_cur, df_student_last,
