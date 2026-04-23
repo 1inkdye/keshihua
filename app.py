@@ -667,26 +667,18 @@ def render_upload_mode():
         st.session_state.task_file_bytes = file_to_bytes(task_file)
         st.session_state.student_file_bytes = file_to_bytes(student_file)
 
-    # ===== 自动对齐分析日期（轻量 + 只执行一次）=====
-    if "auto_aligned" not in st.session_state:
-        raw_task = load_table_from_bytes(st.session_state.task_file_bytes)
+        # ===== 自动对齐分析日期（轻量 + 只执行一次）=====
+        if "auto_aligned" not in st.session_state:
+            raw_task = load_table_from_bytes(st.session_state.task_file_bytes)
 
-        if raw_task is not None and "任务发布时间" in raw_task.columns:
-            task_dates = pd.to_datetime(raw_task["任务发布时间"], errors="coerce")
-
-            if not task_dates.empty:
+            if raw_task is not None and "任务发布时间" in raw_task.columns:
+                task_dates = pd.to_datetime(raw_task["任务发布时间"], errors="coerce")
                 max_task_date = task_dates.max()
 
                 if pd.notna(max_task_date):
                     st.session_state.analysis_anchor_date = max_task_date.date()
 
-        st.session_state.auto_aligned = True
-
-    if not task_dates.empty:
-        max_task_date = task_dates.max()
-
-        if pd.notna(max_task_date):
-            st.session_state.analysis_anchor_date = max_task_date.date()
+            st.session_state.auto_aligned = True
 
         st.session_state.uploaded = True
         st.session_state.page_mode = "national"
