@@ -423,6 +423,28 @@ def load_table_from_bytes(file_dict):
     return pd.read_excel(bio)
 
 @st.cache_data(show_spinner=False)
+def load_table_selected_cols_from_bytes(file_dict, cols):
+    if file_dict is None:
+        return pd.DataFrame()
+
+    bio = BytesIO(file_dict["data"])
+    filename = file_dict["name"]
+
+    try:
+        if filename.lower().endswith(".csv"):
+            return pd.read_csv(bio, usecols=lambda c: c in cols)
+        return pd.read_excel(bio, usecols=lambda c: c in cols)
+    except Exception:
+        # 兜底：如果 usecols 因列名问题失败，退回全量读取
+        bio.seek(0)
+        if filename.lower().endswith(".csv"):
+            df = pd.read_csv(bio)
+        else:
+            df = pd.read_excel(bio)
+        keep_cols = [c for c in cols if c in df.columns]
+        return df[keep_cols]
+    
+@st.cache_data(show_spinner=False)
 def get_teacher_df(file_bytes):
     return preprocess_teacher(load_table_from_bytes(file_bytes))
 
@@ -437,12 +459,11 @@ def get_student_df(file_bytes):
     STUDENT_COLS = [
         "发布时间", "完成时间",
         "老师邮箱", "老师姓名", "任务类型",
-        "学生姓名", "学员号", "学员任务状态",
+        "学员号", "学员任务状态",
         "正确率", "做题数"
     ]
-    raw = load_table_from_bytes(file_bytes)
-    keep_cols = [c for c in STUDENT_COLS if c in raw.columns]
-    return preprocess_student(raw[keep_cols])
+    raw = load_table_selected_cols_from_bytes(file_bytes, STUDENT_COLS)
+    return preprocess_student(raw)
 
 
 @st.cache_data(show_spinner=False)
@@ -485,14 +506,7 @@ def load_all_data(
         df_task_all_raw = get_task_df(task_file_bytes)
 
     if student_file_bytes is not None:
-        STUDENT_COLS = [
-            "发布时间", "完成时间",
-            "老师邮箱", "老师姓名", "任务类型", "任务名称", "主任务名称",
-            "学生姓名", "学员号", "学员任务状态",
-            "正确率", "做题数", "学校", "学校名称", "校区", "校区名称",
-            "老师评语", "老师评星"
-        ]
-        raw_student = load_table_from_bytes(student_file_bytes)
+        df_student_all = get_student_df(student_file_bytes)
         # 只保留实际存在的列
         keep_cols = [c for c in STUDENT_COLS if c in raw_student.columns]
         df_student_all = get_student_df(student_file_bytes)
@@ -846,31 +860,40 @@ def render_dashboard():
                     st.rerun()
                 return
 
-            render_overview(
-                df_school_cur,
-                df_school_last,
-                df_teacher_cur,
-                df_teacher_last,
-                df_task_cur,
-                df_task_last,
-                df_task_30d
-            )
-            st.markdown("---")
-
-            render_detail_analysis(
-                df_school_cur,
-                df_school_last,
-                df_teacher_cur,
-                df_teacher_last,
-                df_task_30d
+            section = st.radio(
+                "查看内容",
+                ["总览", "学校分析", "任务与学生分析"],
+                horizontal=True,
+                key="overview_section"
             )
 
-            render_task_student_analysis(
-                df_task_cur, df_task_last,
-                df_student_cur, df_student_last,
-                df_teacher_cur, df_teacher_last,
-                df_task_type_cur, df_task_type_last,df_task_30d
-            )
+            if section == "总览":
+                render_overview(
+                    df_school_cur,
+                    df_school_last,
+                    df_teacher_cur,
+                    df_teacher_last,
+                    df_task_cur,
+                    df_task_last,
+                    df_task_30d
+                )
+
+            elif section == "学校分析":
+                render_detail_analysis(
+                    df_school_cur,
+                    df_school_last,
+                    df_teacher_cur,
+                    df_teacher_last,
+                    df_task_30d
+                )
+
+            elif section == "任务与学生分析":
+                render_task_student_analysis(
+                    df_task_cur, df_task_last,
+                    df_student_cur, df_student_last,
+                    df_teacher_cur, df_teacher_last,
+                    df_task_type_cur, df_task_type_last, df_task_30d
+                )
 
         elif st.session_state.top_nav_mode == "school":
             st.markdown("## 🏫 学校报告")
