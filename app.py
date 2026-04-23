@@ -507,9 +507,9 @@ def load_all_data(
 
     if student_file_bytes is not None:
         df_student_all = get_student_df(student_file_bytes)
-        # 只保留实际存在的列
-        keep_cols = [c for c in STUDENT_COLS if c in raw_student.columns]
-        df_student_all = get_student_df(student_file_bytes)
+        # # 只保留实际存在的列
+        # keep_cols = [c for c in STUDENT_COLS if c in raw_student.columns]
+        # df_student_all = get_student_df(student_file_bytes)
 
     # ================= 老师维表 + 任务挂维 =================
     if not df_teacher_all.empty:
