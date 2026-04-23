@@ -308,6 +308,25 @@ def render_detail_analysis(
     df_task_30d: pd.DataFrame = None
 ):
     # ========= 先做空数据/缺字段保护 =========
+    DETAIL_CHARTS = [
+        "学校入口总览",
+        "学校榜单（参与率/任务规模/教师活跃率）",
+        "学校参与率×完成率象限分布",
+        "分科目转化率排行",
+        "参与率/完成率变化（按学校）",
+        "老师留存率",
+        "老师渗透率",
+    ]
+    if "detail_selected_charts" not in st.session_state:
+        st.session_state.detail_selected_charts = DETAIL_CHARTS
+    selected = st.multiselect(
+        "选择展示的分析模块",
+        DETAIL_CHARTS,
+        default=st.session_state.detail_selected_charts,
+        key="detail_chart_selector"
+    )
+    st.session_state.detail_selected_charts = selected
+
     if school_cur is None or school_cur.empty:
         st.info("当前分析窗口内暂无学校数据。")
         return
@@ -327,7 +346,8 @@ def render_detail_analysis(
 
     # ========= 学校入口 =========
     entry_df = build_school_entry_df(school_cur_df)
-    render_school_entry_wall(entry_df)
+    if "学校入口总览" in selected:
+        render_school_entry_wall(entry_df)
     st.markdown("""
     <hr style="
         height:1px;
@@ -339,327 +359,329 @@ def render_detail_analysis(
     # =========================================================
     # 一、学校层分析
     # =========================================================
-    st.markdown("### 🏫 学校层分析")
-    school_left, school_right = st.columns([1, 1.2], gap="large")
+    if "学校榜单（参与率/任务规模/教师活跃率）" in selected or "学校参与率×完成率象限分布" in selected:
+        st.markdown("### 🏫 学校层分析")
+        school_left, school_right = st.columns([1, 1.2], gap="large")
+        with school_left:
+            if "学校榜单（参与率/任务规模/教师活跃率）" in selected:
+                st.markdown(
+                        """<div style="display:flex;flex-direction:column;justify-content:flex-start;;display:flex;flex-direction:column;justify-content:space-between;">""",
+                        unsafe_allow_html=True)
 
-    with school_left:
-        st.markdown(
-            """<div style="display:flex;flex-direction:column;justify-content:flex-start;;display:flex;flex-direction:column;justify-content:space-between;">""",
-            unsafe_allow_html=True)
+                active_teacher_df = (
+                    teacher_cur[teacher_cur["发布任务总数"] > 0]
+                    .groupby("学校")["老师姓名"]
+                    .nunique()
+                    .reset_index()
+                )
+                active_teacher_df.columns = ["学校", "活跃老师数"]
 
-        active_teacher_df = (
-            teacher_cur[teacher_cur["发布任务总数"] > 0]
-            .groupby("学校")["老师姓名"]
-            .nunique()
-            .reset_index()
-        )
-        active_teacher_df.columns = ["学校", "活跃老师数"]
+                teacher_count_col = "老师数量" if "老师数量" in school_cur_df.columns else "教师数量"
 
-        teacher_count_col = "老师数量" if "老师数量" in school_cur_df.columns else "教师数量"
+                school_teacher_df = school_cur_df[["学校", teacher_count_col]].copy()
+                school_teacher_df = pd.merge(school_teacher_df, active_teacher_df, on="学校", how="left")
+                school_teacher_df["活跃老师数"] = school_teacher_df["活跃老师数"].fillna(0)
+                school_teacher_df["教师活跃率"] = (
+                        school_teacher_df["活跃老师数"] / school_teacher_df[teacher_count_col] * 100
+                ).fillna(0)
+                rank_mode = st.radio(
+                    "学校榜单视角",
+                    ["参与率TOP10", "任务规模TOP10", "教师活跃率TOP10"],
+                    horizontal=True,
+                    key="school_rank_mode"
+                )
 
-        school_teacher_df = school_cur_df[["学校", teacher_count_col]].copy()
-        school_teacher_df = pd.merge(school_teacher_df, active_teacher_df, on="学校", how="left")
-        school_teacher_df["活跃老师数"] = school_teacher_df["活跃老师数"].fillna(0)
-        school_teacher_df["教师活跃率"] = (
-                school_teacher_df["活跃老师数"] / school_teacher_df[teacher_count_col] * 100
-        ).fillna(0)
-        rank_mode = st.radio(
-            "学校榜单视角",
-            ["参与率TOP10", "任务规模TOP10", "教师活跃率TOP10"],
-            horizontal=True,
-            key="school_rank_mode"
-        )
-
-        if rank_mode == "参与率TOP10":
-            render_rank_card(
-                school_cur_df,
-                name_col="学校",
-                value_col="参与率",
-                title="学校参与率 TOP10",
-                value_suffix="%",
-                sub_col="任务总数" if "任务总数" in school_cur_df.columns else None,
-                sub_fmt=None,
-                sort_ascending=False,
-                top_n=10,
-                key_prefix="school_participation"
-            )
-        elif rank_mode == "任务规模TOP10":
-            render_rank_card(
-                school_cur_df,
-                name_col="学校",
-                value_col="任务总数",
-                title="学校任务规模 TOP10",
-                value_suffix="",
-                sub_col="参与率" if "参与率" in school_cur_df.columns else None,
-                sub_fmt="%",
-                sort_ascending=False,
-                top_n=10,
-                key_prefix="school_task"
-            )
-        else:
-            render_rank_card(
-                school_teacher_df,
-                name_col="学校",
-                value_col="教师活跃率",
-                title="学校教师活跃率 TOP10",
-                value_suffix="%",
-                sub_col="活跃老师数",
-                sub_fmt=None,
-                sort_ascending=False,
-                top_n=10,
-                key_prefix="school_teacher_active"
-            )
-
-        st.markdown("""</div>""", unsafe_allow_html=True)
-
-    with school_right:
-        st.markdown("""<div style="display:flex;flex-direction:column;justify-content:flex-start;;display:flex;flex-direction:column;justify-content:flex-start;">""",
-                    unsafe_allow_html=True)
-
-        st.markdown("#### 学校参与率 × 完成率象限分布")
-
-        scatter_df = school_cur_df[["学校", "参与率", "参与后完成率", "任务总数"]].copy()
-        scatter_df["参与率"] = pd.to_numeric(scatter_df["参与率"], errors="coerce")
-        scatter_df["参与后完成率"] = pd.to_numeric(scatter_df["参与后完成率"], errors="coerce")
-        scatter_df["任务总数"] = pd.to_numeric(scatter_df["任务总数"], errors="coerce")
-        scatter_df = scatter_df.dropna(subset=["学校", "参与率", "参与后完成率"]).copy()
-
-        x_mid = scatter_df["参与率"].median()
-        y_mid = scatter_df["参与后完成率"].median()
-
-        def get_quadrant(x, y, x_mid, y_mid):
-            if x >= x_mid and y >= y_mid:
-                return "高参与·高完成"
-            elif x >= x_mid and y < y_mid:
-                return "高参与·低完成"
-            elif x < x_mid and y >= y_mid:
-                return "低参与·高完成"
-            else:
-                return "低参与·低完成"
-
-        scatter_df["象限"] = scatter_df.apply(
-            lambda r: get_quadrant(r["参与率"], r["参与后完成率"], x_mid, y_mid),
-            axis=1
-        )
-
-        quad_summary = scatter_df["象限"].value_counts().reindex(
-            ["高参与·高完成", "高参与·低完成", "低参与·高完成", "低参与·低完成"],
-            fill_value=0
-        )
-
-        st.markdown(f"""<div class="custom-analytic-card" style="margin:6px 0 14px 0;padding:10px 14px;background:#F8FBFF;border:1px solid #E5EAF3;border-radius:12px;font-size:13px;line-height:1.7;color:#334155;">当前学校分布中，<span style="color:#7BCFA6;font-weight:700;">高参与·高完成</span>学校
-    <span style="font-weight:700;">{quad_summary['高参与·高完成']}</span>所，
-    <span style="color:#4C78A8;font-weight:700;">高参与·低完成</span>学校
-    <span style="font-weight:700;">{quad_summary['高参与·低完成']}</span>所，
-    <span style="color:#F2A541;font-weight:700;">低参与·高完成</span>学校
-    <span style="font-weight:700;">{quad_summary['低参与·高完成']}</span>所，
-    <span style="color:#C97A63;font-weight:700;">低参与·低完成</span>学校
-    <span style="font-weight:700;">{quad_summary['低参与·低完成']}</span>所。整体看，优先关注“高参与但低完成”和“低参与低完成”学校的转化优化空间。
-    </div>""", unsafe_allow_html=True)
-
-        quadrant_order = ["高参与·高完成", "高参与·低完成", "低参与·高完成", "低参与·低完成"]
-        subplot_map = {
-            "高参与·高完成": (1, 1),
-            "高参与·低完成": (1, 2),
-            "低参与·高完成": (2, 1),
-            "低参与·低完成": (2, 2),
-        }
-        quadrant_color_map = {
-            "高参与·高完成": "#7BCFA6",
-            "高参与·低完成": "#4C78A8",
-            "低参与·高完成": "#F2A541",
-            "低参与·低完成": "#C97A63",
-        }
-        quadrant_title_map = {
-            "高参与·高完成": "高参与 · 高完成",
-            "高参与·低完成": "高参与 · 低完成",
-            "低参与·高完成": "低参与 · 高完成",
-            "低参与·低完成": "低参与 · 低完成",
-        }
-
-        TOP_N = 12
-        top_idx = scatter_df.nlargest(min(TOP_N, len(scatter_df)), "任务总数").index
-        scatter_df["show_label"] = scatter_df.index.isin(top_idx)
-        scatter_df["label_text"] = scatter_df["学校"].where(scatter_df["show_label"], "")
-
-        task_vals = scatter_df["任务总数"].fillna(0)
-        if task_vals.nunique() <= 1:
-            scatter_df["bubble_size"] = 18
-        else:
-            norm = (task_vals - task_vals.min()) / (task_vals.max() - task_vals.min())
-            scatter_df["bubble_size"] = 12 + norm.pow(0.6) * 16
-
-        fig_b = make_subplots(
-            rows=2,
-            cols=2,
-            subplot_titles=[
-                quadrant_title_map["高参与·高完成"],
-                quadrant_title_map["高参与·低完成"],
-                quadrant_title_map["低参与·高完成"],
-                quadrant_title_map["低参与·低完成"],
-            ],
-            horizontal_spacing=0.06,
-            vertical_spacing=0.12
-        )
-
-        panel_bg = {
-            (1, 1): "rgba(123,207,166,0.05)",
-            (1, 2): "rgba(76,120,168,0.05)",
-            (2, 1): "rgba(242,165,65,0.05)",
-            (2, 2): "rgba(201,122,99,0.05)",
-        }
-
-        fig_b.add_shape(type="rect", x0=0.00, x1=0.47, y0=0.56, y1=1.00, xref="paper", yref="paper",
-                        line=dict(width=0), fillcolor=panel_bg[(1, 1)], layer="below")
-        fig_b.add_shape(type="rect", x0=0.53, x1=1.00, y0=0.56, y1=1.00, xref="paper", yref="paper",
-                        line=dict(width=0), fillcolor=panel_bg[(1, 2)], layer="below")
-        fig_b.add_shape(type="rect", x0=0.00, x1=0.47, y0=0.00, y1=0.44, xref="paper", yref="paper",
-                        line=dict(width=0), fillcolor=panel_bg[(2, 1)], layer="below")
-        fig_b.add_shape(type="rect", x0=0.53, x1=1.00, y0=0.00, y1=0.44, xref="paper", yref="paper",
-                        line=dict(width=0), fillcolor=panel_bg[(2, 2)], layer="below")
-
-        for quad in quadrant_order:
-            sub_df = scatter_df[scatter_df["象限"] == quad].copy()
-            row, col = subplot_map[quad]
-
-            if sub_df.empty:
-                continue
-
-            sub_df = sub_df.sort_values(
-                by=["show_label", "任务总数", "参与率", "参与后完成率"],
-                ascending=[False, False, False, False]
-            ).reset_index(drop=True)
-
-            n = len(sub_df)
-            if n <= 4:
-                n_cols = 2
-            elif n <= 9:
-                n_cols = 3
-            elif n <= 16:
-                n_cols = 4
-            else:
-                n_cols = 5
-
-            n_rows = math.ceil(n / n_cols)
-            xs, ys, text_pos = [], [], []
-
-            for i in range(n):
-                r = i // n_cols
-                c = i % n_cols
-                x = (c + 1) / (n_cols + 1)
-                y = 1 - (r + 1) / (n_rows + 1)
-                xs.append(x)
-                ys.append(y)
-
-                if c == 0:
-                    pos = "middle right"
-                elif c == n_cols - 1:
-                    pos = "middle left"
-                elif r % 2 == 0:
-                    pos = "top center"
+                if rank_mode == "参与率TOP10":
+                    render_rank_card(
+                        school_cur_df,
+                        name_col="学校",
+                        value_col="参与率",
+                        title="学校参与率 TOP10",
+                        value_suffix="%",
+                        sub_col="任务总数" if "任务总数" in school_cur_df.columns else None,
+                        sub_fmt=None,
+                        sort_ascending=False,
+                        top_n=10,
+                        key_prefix="school_participation"
+                    )
+                elif rank_mode == "任务规模TOP10":
+                    render_rank_card(
+                        school_cur_df,
+                        name_col="学校",
+                        value_col="任务总数",
+                        title="学校任务规模 TOP10",
+                        value_suffix="",
+                        sub_col="参与率" if "参与率" in school_cur_df.columns else None,
+                        sub_fmt="%",
+                        sort_ascending=False,
+                        top_n=10,
+                        key_prefix="school_task"
+                    )
                 else:
-                    pos = "bottom center"
-                text_pos.append(pos)
+                    render_rank_card(
+                        school_teacher_df,
+                        name_col="学校",
+                        value_col="教师活跃率",
+                        title="学校教师活跃率 TOP10",
+                        value_suffix="%",
+                        sub_col="活跃老师数",
+                        sub_fmt=None,
+                        sort_ascending=False,
+                        top_n=10,
+                        key_prefix="school_teacher_active"
+                    )
 
-            sub_df["panel_x"] = xs
-            sub_df["panel_y"] = ys
-            sub_df["text_pos"] = text_pos
+                st.markdown("""</div>""", unsafe_allow_html=True)
+                # 原来的榜单代码不动
+        with school_right:
+            if "学校参与率×完成率象限分布" in selected:
+                st.markdown("""<div style="display:flex;flex-direction:column;justify-content:flex-start;;display:flex;flex-direction:column;justify-content:flex-start;">""",
+                            unsafe_allow_html=True)
 
-            df_plain = sub_df[~sub_df["show_label"]].copy()
-            if not df_plain.empty:
-                fig_b.add_trace(
-                    go.Scatter(
-                        x=df_plain["panel_x"],
-                        y=df_plain["panel_y"],
-                        mode="markers",
-                        marker=dict(
-                            size=df_plain["bubble_size"],
-                            color=quadrant_color_map[quad],
-                            opacity=0.72,
-                            line=dict(width=1, color="rgba(255,255,255,0.25)")
-                        ),
-                        customdata=df_plain[["学校", "参与率", "参与后完成率", "任务总数", "象限"]].values,
-                        hovertemplate=(
-                            "<b>%{customdata[0]}</b><br>"
-                            "参与率：%{customdata[1]:.1f}%<br>"
-                            "参与后完成率：%{customdata[2]:.1f}%<br>"
-                            "任务总数：%{customdata[3]:,.0f}<br>"
-                            "象限：%{customdata[4]}<extra></extra>"
-                        ),
-                        showlegend=False
-                    ),
-                    row=row, col=col
+                st.markdown("#### 学校参与率 × 完成率象限分布")
+
+                scatter_df = school_cur_df[["学校", "参与率", "参与后完成率", "任务总数"]].copy()
+                scatter_df["参与率"] = pd.to_numeric(scatter_df["参与率"], errors="coerce")
+                scatter_df["参与后完成率"] = pd.to_numeric(scatter_df["参与后完成率"], errors="coerce")
+                scatter_df["任务总数"] = pd.to_numeric(scatter_df["任务总数"], errors="coerce")
+                scatter_df = scatter_df.dropna(subset=["学校", "参与率", "参与后完成率"]).copy()
+
+                x_mid = scatter_df["参与率"].median()
+                y_mid = scatter_df["参与后完成率"].median()
+
+                def get_quadrant(x, y, x_mid, y_mid):
+                    if x >= x_mid and y >= y_mid:
+                        return "高参与·高完成"
+                    elif x >= x_mid and y < y_mid:
+                        return "高参与·低完成"
+                    elif x < x_mid and y >= y_mid:
+                        return "低参与·高完成"
+                    else:
+                        return "低参与·低完成"
+
+                scatter_df["象限"] = scatter_df.apply(
+                    lambda r: get_quadrant(r["参与率"], r["参与后完成率"], x_mid, y_mid),
+                    axis=1
                 )
 
-            df_label = sub_df[sub_df["show_label"]].copy()
-            if not df_label.empty:
-                fig_b.add_trace(
-                    go.Scatter(
-                        x=df_label["panel_x"],
-                        y=df_label["panel_y"],
-                        mode="markers+text",
-                        text=df_label["label_text"],
-                        textposition=df_label["text_pos"],
-                        textfont=dict(size=10, color=TEXT_COLOR),
-                        marker=dict(
-                            size=df_label["bubble_size"] + 2,
-                            color=quadrant_color_map[quad],
-                            opacity=0.90,
-                            line=dict(width=1.2, color="rgba(255,255,255,0.40)")
-                        ),
-                        customdata=df_label[["学校", "参与率", "参与后完成率", "任务总数", "象限"]].values,
-                        hovertemplate=(
-                            "<b>%{customdata[0]}</b><br>"
-                            "参与率：%{customdata[1]:.1f}%<br>"
-                            "参与后完成率：%{customdata[2]:.1f}%<br>"
-                            "任务总数：%{customdata[3]:,.0f}<br>"
-                            "象限：%{customdata[4]}<extra></extra>"
-                        ),
-                        showlegend=False
-                    ),
-                    row=row, col=col
+                quad_summary = scatter_df["象限"].value_counts().reindex(
+                    ["高参与·高完成", "高参与·低完成", "低参与·高完成", "低参与·低完成"],
+                    fill_value=0
                 )
 
-        for r in [1, 2]:
-            for c in [1, 2]:
-                fig_b.update_xaxes(row=r, col=c, showgrid=False, zeroline=False, showticklabels=False,
-                                   ticks="", range=[0, 1], fixedrange=True, visible=False)
-                fig_b.update_yaxes(row=r, col=c, showgrid=False, zeroline=False, showticklabels=False,
-                                   ticks="", range=[0, 1], fixedrange=True, visible=False)
+                st.markdown(f"""<div class="custom-analytic-card" style="margin:6px 0 14px 0;padding:10px 14px;background:#F8FBFF;border:1px solid #E5EAF3;border-radius:12px;font-size:13px;line-height:1.7;color:#334155;">当前学校分布中，<span style="color:#7BCFA6;font-weight:700;">高参与·高完成</span>学校
+            <span style="font-weight:700;">{quad_summary['高参与·高完成']}</span>所，
+            <span style="color:#4C78A8;font-weight:700;">高参与·低完成</span>学校
+            <span style="font-weight:700;">{quad_summary['高参与·低完成']}</span>所，
+            <span style="color:#F2A541;font-weight:700;">低参与·高完成</span>学校
+            <span style="font-weight:700;">{quad_summary['低参与·高完成']}</span>所，
+            <span style="color:#C97A63;font-weight:700;">低参与·低完成</span>学校
+            <span style="font-weight:700;">{quad_summary['低参与·低完成']}</span>所。整体看，优先关注“高参与但低完成”和“低参与低完成”学校的转化优化空间。
+            </div>""", unsafe_allow_html=True)
 
-        for quad in quadrant_order:
-            sub_df = scatter_df[scatter_df["象限"] == quad]
-            row, col = subplot_map[quad]
-            idx = (row - 1) * 2 + col
-            xref = "x domain" if idx == 1 else f"x{idx} domain"
-            yref = "y domain" if idx == 1 else f"y{idx} domain"
+                quadrant_order = ["高参与·高完成", "高参与·低完成", "低参与·高完成", "低参与·低完成"]
+                subplot_map = {
+                    "高参与·高完成": (1, 1),
+                    "高参与·低完成": (1, 2),
+                    "低参与·高完成": (2, 1),
+                    "低参与·低完成": (2, 2),
+                }
+                quadrant_color_map = {
+                    "高参与·高完成": "#7BCFA6",
+                    "高参与·低完成": "#4C78A8",
+                    "低参与·高完成": "#F2A541",
+                    "低参与·低完成": "#C97A63",
+                }
+                quadrant_title_map = {
+                    "高参与·高完成": "高参与 · 高完成",
+                    "高参与·低完成": "高参与 · 低完成",
+                    "低参与·高完成": "低参与 · 高完成",
+                    "低参与·低完成": "低参与 · 低完成",
+                }
 
-            fig_b.add_annotation(
-                x=0.98, y=0.97, xref=xref, yref=yref,
-                text=f"{len(sub_df)} 所学校",
-                showarrow=False, xanchor="right", yanchor="top",
-                font=dict(size=11, color=SUB_TEXT_COLOR)
-            )
+                TOP_N = 12
+                top_idx = scatter_df.nlargest(min(TOP_N, len(scatter_df)), "任务总数").index
+                scatter_df["show_label"] = scatter_df.index.isin(top_idx)
+                scatter_df["label_text"] = scatter_df["学校"].where(scatter_df["show_label"], "")
 
-        for anno in fig_b.layout.annotations:
-            if "所学校" not in str(anno.text):
-                anno.font = dict(size=14, color=TEXT_COLOR)
+                task_vals = scatter_df["任务总数"].fillna(0)
+                if task_vals.nunique() <= 1:
+                    scatter_df["bubble_size"] = 18
+                else:
+                    norm = (task_vals - task_vals.min()) / (task_vals.max() - task_vals.min())
+                    scatter_df["bubble_size"] = 12 + norm.pow(0.6) * 16
 
-        fig_b.update_layout(
-            height=500,
-            plot_bgcolor=CARD_BG,
-            paper_bgcolor=CARD_BG,
-            font=dict(color=TEXT_COLOR),
-            margin=dict(l=20, r=20, t=45, b=20),
-            hoverlabel=dict(bgcolor="rgba(15,23,42,0.96)", font=dict(color="white", size=10))
-        )
+                fig_b = make_subplots(
+                    rows=2,
+                    cols=2,
+                    subplot_titles=[
+                        quadrant_title_map["高参与·高完成"],
+                        quadrant_title_map["高参与·低完成"],
+                        quadrant_title_map["低参与·高完成"],
+                        quadrant_title_map["低参与·低完成"],
+                    ],
+                    horizontal_spacing=0.06,
+                    vertical_spacing=0.12
+                )
 
-        st.caption(
-            f"象限划分口径：参与率中位数 {x_mid:.1f}%｜参与后完成率中位数 {y_mid:.1f}%｜仅展示任务总数 Top {min(TOP_N, len(scatter_df))} 学校名称"
-        )
-        st.plotly_chart(fig_b, use_container_width=True)
+                panel_bg = {
+                    (1, 1): "rgba(123,207,166,0.05)",
+                    (1, 2): "rgba(76,120,168,0.05)",
+                    (2, 1): "rgba(242,165,65,0.05)",
+                    (2, 2): "rgba(201,122,99,0.05)",
+                }
 
-        st.markdown("""</div>""", unsafe_allow_html=True)
+                fig_b.add_shape(type="rect", x0=0.00, x1=0.47, y0=0.56, y1=1.00, xref="paper", yref="paper",
+                                line=dict(width=0), fillcolor=panel_bg[(1, 1)], layer="below")
+                fig_b.add_shape(type="rect", x0=0.53, x1=1.00, y0=0.56, y1=1.00, xref="paper", yref="paper",
+                                line=dict(width=0), fillcolor=panel_bg[(1, 2)], layer="below")
+                fig_b.add_shape(type="rect", x0=0.00, x1=0.47, y0=0.00, y1=0.44, xref="paper", yref="paper",
+                                line=dict(width=0), fillcolor=panel_bg[(2, 1)], layer="below")
+                fig_b.add_shape(type="rect", x0=0.53, x1=1.00, y0=0.00, y1=0.44, xref="paper", yref="paper",
+                                line=dict(width=0), fillcolor=panel_bg[(2, 2)], layer="below")
+
+                for quad in quadrant_order:
+                    sub_df = scatter_df[scatter_df["象限"] == quad].copy()
+                    row, col = subplot_map[quad]
+
+                    if sub_df.empty:
+                        continue
+
+                    sub_df = sub_df.sort_values(
+                        by=["show_label", "任务总数", "参与率", "参与后完成率"],
+                        ascending=[False, False, False, False]
+                    ).reset_index(drop=True)
+
+                    n = len(sub_df)
+                    if n <= 4:
+                        n_cols = 2
+                    elif n <= 9:
+                        n_cols = 3
+                    elif n <= 16:
+                        n_cols = 4
+                    else:
+                        n_cols = 5
+
+                    n_rows = math.ceil(n / n_cols)
+                    xs, ys, text_pos = [], [], []
+
+                    for i in range(n):
+                        r = i // n_cols
+                        c = i % n_cols
+                        x = (c + 1) / (n_cols + 1)
+                        y = 1 - (r + 1) / (n_rows + 1)
+                        xs.append(x)
+                        ys.append(y)
+
+                        if c == 0:
+                            pos = "middle right"
+                        elif c == n_cols - 1:
+                            pos = "middle left"
+                        elif r % 2 == 0:
+                            pos = "top center"
+                        else:
+                            pos = "bottom center"
+                        text_pos.append(pos)
+
+                    sub_df["panel_x"] = xs
+                    sub_df["panel_y"] = ys
+                    sub_df["text_pos"] = text_pos
+
+                    df_plain = sub_df[~sub_df["show_label"]].copy()
+                    if not df_plain.empty:
+                        fig_b.add_trace(
+                            go.Scatter(
+                                x=df_plain["panel_x"],
+                                y=df_plain["panel_y"],
+                                mode="markers",
+                                marker=dict(
+                                    size=df_plain["bubble_size"],
+                                    color=quadrant_color_map[quad],
+                                    opacity=0.72,
+                                    line=dict(width=1, color="rgba(255,255,255,0.25)")
+                                ),
+                                customdata=df_plain[["学校", "参与率", "参与后完成率", "任务总数", "象限"]].values,
+                                hovertemplate=(
+                                    "<b>%{customdata[0]}</b><br>"
+                                    "参与率：%{customdata[1]:.1f}%<br>"
+                                    "参与后完成率：%{customdata[2]:.1f}%<br>"
+                                    "任务总数：%{customdata[3]:,.0f}<br>"
+                                    "象限：%{customdata[4]}<extra></extra>"
+                                ),
+                                showlegend=False
+                            ),
+                            row=row, col=col
+                        )
+
+                    df_label = sub_df[sub_df["show_label"]].copy()
+                    if not df_label.empty:
+                        fig_b.add_trace(
+                            go.Scatter(
+                                x=df_label["panel_x"],
+                                y=df_label["panel_y"],
+                                mode="markers+text",
+                                text=df_label["label_text"],
+                                textposition=df_label["text_pos"],
+                                textfont=dict(size=10, color=TEXT_COLOR),
+                                marker=dict(
+                                    size=df_label["bubble_size"] + 2,
+                                    color=quadrant_color_map[quad],
+                                    opacity=0.90,
+                                    line=dict(width=1.2, color="rgba(255,255,255,0.40)")
+                                ),
+                                customdata=df_label[["学校", "参与率", "参与后完成率", "任务总数", "象限"]].values,
+                                hovertemplate=(
+                                    "<b>%{customdata[0]}</b><br>"
+                                    "参与率：%{customdata[1]:.1f}%<br>"
+                                    "参与后完成率：%{customdata[2]:.1f}%<br>"
+                                    "任务总数：%{customdata[3]:,.0f}<br>"
+                                    "象限：%{customdata[4]}<extra></extra>"
+                                ),
+                                showlegend=False
+                            ),
+                            row=row, col=col
+                        )
+
+                for r in [1, 2]:
+                    for c in [1, 2]:
+                        fig_b.update_xaxes(row=r, col=c, showgrid=False, zeroline=False, showticklabels=False,
+                                        ticks="", range=[0, 1], fixedrange=True, visible=False)
+                        fig_b.update_yaxes(row=r, col=c, showgrid=False, zeroline=False, showticklabels=False,
+                                        ticks="", range=[0, 1], fixedrange=True, visible=False)
+
+                for quad in quadrant_order:
+                    sub_df = scatter_df[scatter_df["象限"] == quad]
+                    row, col = subplot_map[quad]
+                    idx = (row - 1) * 2 + col
+                    xref = "x domain" if idx == 1 else f"x{idx} domain"
+                    yref = "y domain" if idx == 1 else f"y{idx} domain"
+
+                    fig_b.add_annotation(
+                        x=0.98, y=0.97, xref=xref, yref=yref,
+                        text=f"{len(sub_df)} 所学校",
+                        showarrow=False, xanchor="right", yanchor="top",
+                        font=dict(size=11, color=SUB_TEXT_COLOR)
+                    )
+
+                for anno in fig_b.layout.annotations:
+                    if "所学校" not in str(anno.text):
+                        anno.font = dict(size=14, color=TEXT_COLOR)
+
+                fig_b.update_layout(
+                    height=500,
+                    plot_bgcolor=CARD_BG,
+                    paper_bgcolor=CARD_BG,
+                    font=dict(color=TEXT_COLOR),
+                    margin=dict(l=20, r=20, t=45, b=20),
+                    hoverlabel=dict(bgcolor="rgba(15,23,42,0.96)", font=dict(color="white", size=10))
+                )
+
+                st.caption(
+                    f"象限划分口径：参与率中位数 {x_mid:.1f}%｜参与后完成率中位数 {y_mid:.1f}%｜仅展示任务总数 Top {min(TOP_N, len(scatter_df))} 学校名称"
+                )
+                st.plotly_chart(fig_b, use_container_width=True)
+
+                st.markdown("""</div>""", unsafe_allow_html=True)# 原来的象限图代码不动
 
     st.markdown("---")
 
@@ -670,76 +692,77 @@ def render_detail_analysis(
 
     if "科目" in teacher_cur.columns and "学校" in teacher_cur.columns:
         subject_df = teacher_cur.copy().dropna(subset=["科目"])
-
-        left_col, right_col = st.columns(2, gap="large")
+        if "分科目转化率排行" in selected or "参与率/完成率变化（按学校）" in selected:
+            left_col, right_col = st.columns(2, gap="large")
 
         # =========================
         # 左：总体分科目转化率排行
         # =========================
-        school_cur_part = school_cur_df[["学校", "参与率", "参与后完成率"]].copy().rename(columns={
-            "参与率": "本周参与率",
-            "参与后完成率": "本周参与后完成率"
-        })
-        school_last_part = school_last_df[["学校", "参与率", "参与后完成率"]].copy().rename(columns={
-            "参与率": "上周参与率",
-            "参与后完成率": "上周参与后完成率"
-        })
+            school_cur_part = school_cur_df[["学校", "参与率", "参与后完成率"]].copy().rename(columns={
+                "参与率": "本周参与率",
+                "参与后完成率": "本周参与后完成率"
+            })
+            school_last_part = school_last_df[["学校", "参与率", "参与后完成率"]].copy().rename(columns={
+                "参与率": "上周参与率",
+                "参与后完成率": "上周参与后完成率"
+            })
 
-        for col in ["本周参与率", "本周参与后完成率"]:
-            school_cur_part[col] = pd.to_numeric(school_cur_part[col], errors="coerce")
+            for col in ["本周参与率", "本周参与后完成率"]:
+                school_cur_part[col] = pd.to_numeric(school_cur_part[col], errors="coerce")
 
-        for col in ["上周参与率", "上周参与后完成率"]:
-            school_last_part[col] = pd.to_numeric(school_last_part[col], errors="coerce")
+            for col in ["上周参与率", "上周参与后完成率"]:
+                school_last_part[col] = pd.to_numeric(school_last_part[col], errors="coerce")
 
-        school_change = pd.merge(school_cur_part, school_last_part, on="学校", how="inner")
+            school_change = pd.merge(school_cur_part, school_last_part, on="学校", how="inner")
 
-        school_change["参与率变化"] = school_change["本周参与率"] - school_change["上周参与率"]
-        school_change["参与后完成率变化"] = (
-                school_change["本周参与后完成率"] - school_change["上周参与后完成率"]
-        )
-
-        with left_col:
-            st.markdown("#### 分科目转化率排行（下滑看完整数据）")
-
-            summary = (
-                subject_df.groupby("科目", as_index=False)[
-                    ["接收任务学生数", "打开任务学生数", "完成任务学生数"]
-                ]
-                .sum()
+            school_change["参与率变化"] = school_change["本周参与率"] - school_change["上周参与率"]
+            school_change["参与后完成率变化"] = (
+                    school_change["本周参与后完成率"] - school_change["上周参与后完成率"]
             )
 
-            if summary.empty:
-                st.info("当前没有可用于分析的科目数据。")
-            else:
-                summary["参与率"] = summary.apply(
-                    lambda x: x["打开任务学生数"] / x["接收任务学生数"] * 100
-                    if x["接收任务学生数"] else 0, axis=1
-                )
-                summary["参与后完成率"] = summary.apply(
-                    lambda x: x["完成任务学生数"] / x["打开任务学生数"] * 100
-                    if x["打开任务学生数"] else 0, axis=1
-                )
+            with left_col:
+                if "分科目转化率排行" in selected:
+                    st.markdown("#### 分科目转化率排行（下滑看完整数据）")
 
-                sort_by_left = st.radio(
-                    "总体排序方式",
-                    ["参与后完成率", "参与率"],
-                    horizontal=True,
-                    key="subject_rank_total"
-                )
+                    summary = (
+                        subject_df.groupby("科目", as_index=False)[
+                            ["接收任务学生数", "打开任务学生数", "完成任务学生数"]
+                        ]
+                        .sum()
+                    )
 
-                summary = summary.sort_values(sort_by_left, ascending=False).reset_index(drop=True)
+                    if summary.empty:
+                        st.info("当前没有可用于分析的科目数据。")
+                    else:
+                        summary["参与率"] = summary.apply(
+                            lambda x: x["打开任务学生数"] / x["接收任务学生数"] * 100
+                            if x["接收任务学生数"] else 0, axis=1
+                        )
+                        summary["参与后完成率"] = summary.apply(
+                            lambda x: x["完成任务学生数"] / x["打开任务学生数"] * 100
+                            if x["打开任务学生数"] else 0, axis=1
+                        )
 
-                rank_colors = ["#F59E0B", "#9CA3AF", "#CD7C3A"]
+                        sort_by_left = st.radio(
+                            "总体排序方式",
+                            ["参与后完成率", "参与率"],
+                            horizontal=True,
+                            key="subject_rank_total"
+                        )
 
-                rows_html = ""
-                for i, row in summary.iterrows():
-                    rate1 = row["参与率"]
-                    rate2 = row["参与后完成率"]
-                    rank = i + 1
-                    badge_bg = rank_colors[rank - 1] if rank <= 3 else "#374151"
-                    divider = "" if i == len(summary) - 1 else "border-bottom: 1px solid #E5EAF3;"
+                        summary = summary.sort_values(sort_by_left, ascending=False).reset_index(drop=True)
 
-                    rows_html += f"""
+                        rank_colors = ["#F59E0B", "#9CA3AF", "#CD7C3A"]
+
+                        rows_html = ""
+                        for i, row in summary.iterrows():
+                            rate1 = row["参与率"]
+                            rate2 = row["参与后完成率"]
+                            rank = i + 1
+                            badge_bg = rank_colors[rank - 1] if rank <= 3 else "#374151"
+                            divider = "" if i == len(summary) - 1 else "border-bottom: 1px solid #E5EAF3;"
+
+                            rows_html += f"""
 <div class="rank-board-row" style="display:flex;align-items:center;padding:8px 10px;{divider}">
 <div style="display:flex;align-items:center;gap:10px;flex:2;">
 <div style="width:26px;height:26px;border-radius:7px;background:{badge_bg};color:white;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">{rank}</div>
@@ -756,7 +779,7 @@ def render_detail_analysis(
 </div>
 """
 
-                full_html = f"""
+                        full_html = f"""
 <div class="rank-board-card" style="
 background:#FFFFFF;
 border:1px solid #E5EAF3;
@@ -765,227 +788,149 @@ padding:10px 14px;
 height:325px;
 overflow:auto;
 ">
-                    {rows_html}
+{rows_html}
 </div>
 """
-                st.markdown(full_html, unsafe_allow_html=True)
-
-        # =========================
-        # 右侧：参与率 / 参与后完成率 切换
-        # =========================
-        with right_col:
-
-            # ===== 切换按钮 =====
-            if "rate_switch" not in st.session_state:
-                st.session_state.rate_switch = "参与率"
-
-            btn1, btn2 = st.columns(2)
-
-            with btn1:
-                if st.button(
-                        "参与率变化",
-                        use_container_width=True,
-                        type="primary" if st.session_state.rate_switch == "参与率" else "secondary"
-                ):
-                    st.session_state.rate_switch = "参与率"
-                    # 删掉 st.rerun()
-
-            with btn2:
-                if st.button(
-                        "参与后完成率变化",
-                        use_container_width=True,
-                        type="primary" if st.session_state.rate_switch == "参与后完成率" else "secondary"
-                ):
-                    st.session_state.rate_switch = "参与后完成率"
-                    # 删掉 st.rerun()
-
-            st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
+                        st.markdown(full_html, unsafe_allow_html=True)
 
             # =========================
-            # 根据选择切换数据
+            # 右侧：参与率 / 参与后完成率 切换
             # =========================
-            if st.session_state.rate_switch == "参与率":
-                metric_col = "参与率变化"
-                title = "参与率变化（按学校）Top/Bottom"
-                text_fmt = "{:+.0f}%"
-            else:
-                metric_col = "参与后完成率变化"
-                title = "参与后完成率变化（按学校）Top/Bottom"
-                text_fmt = "{:+.1f}%"
+            with right_col:
+                if "参与率/完成率变化（按学校）" in selected:
+                    # ===== 切换按钮 =====
+                    if "rate_switch" not in st.session_state:
+                        st.session_state.rate_switch = "参与率"
 
-            st.markdown(f"#### {title}")
+                    btn1, btn2 = st.columns(2)
 
-            # =========================
-            # 数据处理
-            # =========================
-            top_up = school_change.sort_values(metric_col, ascending=False).head(5)
-            top_down = school_change.sort_values(metric_col, ascending=True).head(5)
+                    with btn1:
+                        if st.button(
+                                "参与率变化",
+                                use_container_width=True,
+                                type="primary" if st.session_state.rate_switch == "参与率" else "secondary"
+                        ):
+                            st.session_state.rate_switch = "参与率"
+                            # 删掉 st.rerun()
 
-            change_df = pd.concat([top_down, top_up], ignore_index=True)
-            change_df = change_df.drop_duplicates(subset=["学校"])
-            change_df = change_df.sort_values(metric_col, ascending=True)
+                    with btn2:
+                        if st.button(
+                                "参与后完成率变化",
+                                use_container_width=True,
+                                type="primary" if st.session_state.rate_switch == "参与后完成率" else "secondary"
+                        ):
+                            st.session_state.rate_switch = "参与后完成率"
+                            # 删掉 st.rerun()
 
-            if change_df.empty:
-                st.info("当前没有可用于分析的学校变化数据。")
-            else:
-                raw_max = change_df[metric_col].abs().max()
-                max_val = max(raw_max * 1.15, 10)
+                    st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
 
-                fig_d = go.Figure()
+                # =========================
+                # 根据选择切换数据
+                # =========================
+                    if st.session_state.rate_switch == "参与率":
+                        metric_col = "参与率变化"
+                        title = "参与率变化（按学校）Top/Bottom"
+                        text_fmt = "{:+.0f}%"
+                    else:
+                        metric_col = "参与后完成率变化"
+                        title = "参与后完成率变化（按学校）Top/Bottom"
+                        text_fmt = "{:+.1f}%"
 
-                # ===== 背景轨道 =====
-                fig_d.add_trace(go.Bar(
-                    x=[max_val] * len(change_df),
-                    y=change_df["学校"],
-                    orientation="h",
-                    marker=dict(color="rgba(148,163,184,0.14)", line_width=0),
-                    showlegend=False,
-                    hoverinfo="skip"
-                ))
+                    st.markdown(f"#### {title}")
 
-                fig_d.add_trace(go.Bar(
-                    x=[-max_val] * len(change_df),
-                    y=change_df["学校"],
-                    orientation="h",
-                    marker=dict(color="rgba(148,163,184,0.14)", line_width=0),
-                    showlegend=False,
-                    hoverinfo="skip"
-                ))
+                    # =========================
+                    # 数据处理
+                    # =========================
+                    top_up = school_change.sort_values(metric_col, ascending=False).head(5)
+                    top_down = school_change.sort_values(metric_col, ascending=True).head(5)
 
-                # ===== 实际数据 =====
-                for _, row in change_df.iterrows():
-                    val = row[metric_col]
-                    color = COLOR_SECOND if val >= 0 else COLOR_DANGER
+                    change_df = pd.concat([top_down, top_up], ignore_index=True)
+                    change_df = change_df.drop_duplicates(subset=["学校"])
+                    change_df = change_df.sort_values(metric_col, ascending=True)
 
-                    fig_d.add_trace(go.Bar(
-                        x=[val],
-                        y=[row["学校"]],
-                        orientation="h",
-                        marker=dict(color=color, line_width=0),
-                        text=text_fmt.format(val),
-                        textposition="inside",
-                        textfont=dict(color="#FFFFFF", size=11),
-                        showlegend=False,
-                        hovertemplate=f"{row['学校']}: {text_fmt.format(val)}<extra></extra>"
-                    ))
+                    if change_df.empty:
+                        st.info("当前没有可用于分析的学校变化数据。")
+                    else:
+                        raw_max = change_df[metric_col].abs().max()
+                        max_val = max(raw_max * 1.15, 10)
 
-                # ===== 样式 =====
-                fig_d.update_layout(
-                    barmode="overlay",
-                    bargap=0.32,
-                    plot_bgcolor=CARD_BG,
-                    paper_bgcolor=CARD_BG,
-                    font=dict(color=TEXT_COLOR, size=11),
-                    height=330,
-                    margin=dict(l=26, r=26, t=8, b=20),
-                    xaxis=dict(
-                        range=[-max_val * 1.05, max_val * 1.05],
-                        showgrid=False,
-                        zeroline=True,
-                        zerolinecolor="#D7E1EE",
-                        zerolinewidth=1.2,
-                        tickfont=dict(color=SUB_TEXT_COLOR, size=11),
-                        showline=False
-                    ),
-                    yaxis=dict(
-                        showgrid=False,
-                        tickfont=dict(color=TEXT_COLOR, size=11),
-                        categoryorder="array",
-                        categoryarray=change_df["学校"].tolist(),
-                        automargin=True
-                    ),
-                    hoverlabel=dict(
-                        bgcolor=HOVER_BG,
-                        font_color=TEXT_COLOR,
-                        bordercolor=HOVER_BG
-                    )
-                )
+                        fig_d = go.Figure()
 
-                try:
-                    fig_d.update_layout(barcornerradius=999)
-                except Exception:
-                    pass
+                        # ===== 背景轨道 =====
+                        fig_d.add_trace(go.Bar(
+                            x=[max_val] * len(change_df),
+                            y=change_df["学校"],
+                            orientation="h",
+                            marker=dict(color="rgba(148,163,184,0.14)", line_width=0),
+                            showlegend=False,
+                            hoverinfo="skip"
+                        ))
 
-                render_chart_card(fig_d)
+                        fig_d.add_trace(go.Bar(
+                            x=[-max_val] * len(change_df),
+                            y=change_df["学校"],
+                            orientation="h",
+                            marker=dict(color="rgba(148,163,184,0.14)", line_width=0),
+                            showlegend=False,
+                            hoverinfo="skip"
+                        ))
 
-    #     with right_col:
-    #         st.markdown("#### 校区分科目排行")
-    #
-    #         school_options = sorted(subject_df["学校"].dropna().unique().tolist())
-    #         selected_school_subject = st.selectbox(
-    #             "选择校区",
-    #             school_options,
-    #             key="subject_rank_school"
-    #         )
-    #
-    #         school_subject_df = subject_df[subject_df["学校"] == selected_school_subject].copy()
-    #
-    #         school_summary = (
-    #             school_subject_df.groupby("科目", as_index=False)[
-    #                 ["接收任务学生数", "打开任务学生数", "完成任务学生数"]
-    #             ]
-    #             .sum()
-    #         )
-    #
-    #         if school_summary.empty:
-    #             st.info("当前校区没有可用于分析的科目数据。")
-    #         else:
-    #             school_summary["参与率"] = school_summary.apply(
-    #                 lambda x: x["打开任务学生数"] / x["接收任务学生数"] * 100
-    #                 if x["接收任务学生数"] else 0, axis=1
-    #             )
-    #             school_summary["参与后完成率"] = school_summary.apply(
-    #                 lambda x: x["完成任务学生数"] / x["打开任务学生数"] * 100
-    #                 if x["打开任务学生数"] else 0, axis=1
-    #             )
-    #
-    #             sort_by_right = st.radio(
-    #                 "校区排序方式",
-    #                 ["参与后完成率", "参与率"],
-    #                 horizontal=True,
-    #                 key="subject_rank_school_sort"
-    #             )
-    #
-    #             school_summary = school_summary.sort_values(sort_by_right, ascending=False).reset_index(drop=True)
-    #
-    #             rank_colors = ["#F59E0B", "#9CA3AF", "#CD7C3A"]
-    #
-    #             rows_html_school = ""
-    #             for i, row in school_summary.iterrows():
-    #                 rate1 = row["参与率"]
-    #                 rate2 = row["参与后完成率"]
-    #                 rank = i + 1
-    #                 badge_bg = rank_colors[rank - 1] if rank <= 3 else "#374151"
-    #                 divider = "" if i == len(school_summary) - 1 else "border-bottom: 1px solid rgba(255,255,255,0.06);"
-    #
-    #                 rows_html_school += f"""<div style="display:flex;align-items:center;padding:8px 1px;{divider}">
-    #             <div style="display:flex;align-items:center;gap:10px;flex:1.5;">
-    #             <div style="width:22px;height:22px;border-radius:6px;background:{badge_bg};color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">{rank}</div>
-    #             <div style="font-size:13px;font-weight:600;color:white;line-height:1.2;">{row['科目']}</div>
-    #             </div>
-    #             <div style="flex:0.7;text-align:center;">
-    #             <div style="font-size:13px;font-weight:700;color:#60A5FA;line-height:1.2;">{rate1:.1f}%</div>
-    #             <div style="font-size:9px;color:#8FA3BF;margin-top:1px;">参与率</div>
-    #             </div>
-    #             <div style="flex:0.7;text-align:center;">
-    #             <div style="font-size:13px;font-weight:700;color:#34D399;line-height:1.2;">{rate2:.1f}%</div>
-    #             <div style="font-size:9px;color:#8FA3BF;margin-top:1px;">参与后完成率</div>
-    #             </div>
-    #             </div>"""
-    #
-    #             full_html_school = f"""
-    #             <div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:10px 14px;height:270px;overflow:auto;">
-    #                 {rows_html_school}
-    #             </div>
-    #             """
-    #             st.markdown(full_html_school, unsafe_allow_html=True)
-    #
-    # else:
-    #     st.info("老师数据中未检测到【学校】或【科目】字段，暂时无法展示分科目转化率排行。")
-    #
-    # st.markdown("---")
+                        # ===== 实际数据 =====
+                        for _, row in change_df.iterrows():
+                            val = row[metric_col]
+                            color = COLOR_SECOND if val >= 0 else COLOR_DANGER
 
-        st.markdown("""
+                            fig_d.add_trace(go.Bar(
+                                x=[val],
+                                y=[row["学校"]],
+                                orientation="h",
+                                marker=dict(color=color, line_width=0),
+                                text=text_fmt.format(val),
+                                textposition="inside",
+                                textfont=dict(color="#FFFFFF", size=11),
+                                showlegend=False,
+                                hovertemplate=f"{row['学校']}: {text_fmt.format(val)}<extra></extra>"
+                            ))
+
+                        # ===== 样式 =====
+                        fig_d.update_layout(
+                            barmode="overlay",
+                            bargap=0.32,
+                            plot_bgcolor=CARD_BG,
+                            paper_bgcolor=CARD_BG,
+                            font=dict(color=TEXT_COLOR, size=11),
+                            height=330,
+                            margin=dict(l=26, r=26, t=8, b=20),
+                            xaxis=dict(
+                                range=[-max_val * 1.05, max_val * 1.05],
+                                showgrid=False,
+                                zeroline=True,
+                                zerolinecolor="#D7E1EE",
+                                zerolinewidth=1.2,
+                                tickfont=dict(color=SUB_TEXT_COLOR, size=11),
+                                showline=False
+                            ),
+                            yaxis=dict(
+                                showgrid=False,
+                                tickfont=dict(color=TEXT_COLOR, size=11),
+                                categoryorder="array",
+                                categoryarray=change_df["学校"].tolist(),
+                                automargin=True
+                            ),
+                            hoverlabel=dict(
+                                bgcolor=HOVER_BG,
+                                font_color=TEXT_COLOR,
+                                bordercolor=HOVER_BG
+                            )
+                        )
+
+                        try:
+                            fig_d.update_layout(barcornerradius=999)
+                        except Exception:
+                            pass
+
+                        render_chart_card(fig_d)
+            st.markdown("""
     <hr style="
     height:0px;
     border:none;
@@ -994,8 +939,6 @@ overflow:auto;
     ">
     """, unsafe_allow_html=True)
         # ========= 第三层：老师留存 + 渗透 =========
-        st.markdown("### 🧑‍🏫老师层分析")
-
         # ===== 渗透率计算：近7天去重活跃老师 / 近30天去重老师池 =====
         def _teacher_key(df: pd.DataFrame) -> pd.Series:
             if df is None or df.empty:
@@ -1050,14 +993,16 @@ overflow:auto;
         retain_ratio = retain / cur_active * 100 if cur_active else 0
         new_ratio = new / cur_active * 100 if cur_active else 0
         lost_ratio_last = lost / last_active * 100 if last_active else 0
-
-        left_ret, right_ret = st.columns(2, gap="large")
+        if "老师留存率" in selected or "老师渗透率" in selected:
+            st.markdown("### 🧑‍🏫老师层分析")
+            left_ret, right_ret = st.columns(2, gap="large")
 
         # ================= 左：留存率 =================
-        with left_ret:
-            st.markdown("#### 老师留存率")
+            with left_ret:
+                if "老师留存率" in selected:
+                    st.markdown("#### 老师留存率")
 
-            st.markdown(f"""
+                    st.markdown(f"""
     <div class="custom-analytic-card" style="height: 400px;overflow: hidden;display: flex;flex-direction: column;justify-content: space-between;background:#FFFFFF;border: 1px solid #E5EAF3;border-left: 4px solid {COLOR_SECOND};border-radius: 18px;padding: 16px 18px;"><div>
     <div style="font-size:13px;color:#6B7A90;font-weight:600;">老师留存率</div>
     <div style="font-size:24px;font-weight:800;color:#16324F;line-height:1.15;margin-top:3px;">
@@ -1091,12 +1036,13 @@ overflow:auto;
     """, unsafe_allow_html=True)
 
         # ================= 右：渗透率 =================
-        with right_ret:
-            st.markdown("#### 老师渗透率")
+            with right_ret:
+                if "老师渗透率" in selected:
+                    st.markdown("#### 老师渗透率")
 
-            delta_color = "#4ADE80" if penetration_delta >= 0 else "#F87171"
+                    delta_color = "#4ADE80" if penetration_delta >= 0 else "#F87171"
 
-            st.markdown(f"""
+                    st.markdown(f"""
     <div class="custom-analytic-card" style="height: 400px;overflow: hidden;display: flex;flex-direction: column;justify-content: space-between;background: #FFFFFF;border: 1px solid #E5EAF3;border-left: 4px solid {COLOR_WARN};border-radius: 18px;padding: 16px 18px;"><div>
     <div style="font-size:13px;color:#6B7A90;font-weight:600;">近7天老师渗透率</div>
     <div style="display:flex;align-items:baseline;gap:10px;margin-top:3px;">
@@ -1136,17 +1082,17 @@ overflow:auto;
     </div>
     """, unsafe_allow_html=True)
 
-        # ================= 底部一句结论 =================
-        if teacher_penetration_cur >= 60 and retention_rate >= 60:
-            conclusion = "老师覆盖和连续活跃都较好，当前工具已具备较强的使用广度与稳定性。"
-        elif teacher_penetration_cur >= 60 and retention_rate < 60:
-            conclusion = "老师覆盖较高，但留存偏弱，说明推广已经铺开，后续更应关注持续使用体验。"
-        elif teacher_penetration_cur < 60 and retention_rate >= 60:
-            conclusion = "老师留存表现较稳，但整体覆盖仍有限，说明现有使用老师认可度较高，可继续扩大触达。"
-        else:
-            conclusion = "当前老师覆盖和连续活跃均有提升空间，建议同时关注推广触达与产品使用粘性。"
+            # ================= 底部一句结论 =================
+            if teacher_penetration_cur >= 60 and retention_rate >= 60:
+                conclusion = "老师覆盖和连续活跃都较好，当前工具已具备较强的使用广度与稳定性。"
+            elif teacher_penetration_cur >= 60 and retention_rate < 60:
+                conclusion = "老师覆盖较高，但留存偏弱，说明推广已经铺开，后续更应关注持续使用体验。"
+            elif teacher_penetration_cur < 60 and retention_rate >= 60:
+                conclusion = "老师留存表现较稳，但整体覆盖仍有限，说明现有使用老师认可度较高，可继续扩大触达。"
+            else:
+                conclusion = "当前老师覆盖和连续活跃均有提升空间，建议同时关注推广触达与产品使用粘性。"
 
-        st.markdown(
+            st.markdown(
     f"""
     <div class="custom-analytic-card" style="margin-top:14px;background:#F8FBFF;border:1px solid #E5EAF3;border-radius:14px;padding:12px 16px;color:#425466;font-size:13px;line-height:1.7;">
     <b style="color:#16324F;">结论：</b>{conclusion}

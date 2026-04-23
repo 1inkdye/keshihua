@@ -593,7 +593,16 @@ def render_overview_deep_analysis_panel_v2(
 
 
 def render_overview(df_school_cur, df_school_last, df_teacher_cur, df_teacher_last, df_task_cur=None, df_task_last=None, df_task_30d=None):
-
+    OVERVIEW_CHARTS = ["本周分析摘要", "核心指标", "近30天趋势", "近7天 & 近30天漏斗"]
+    if "overview_selected_charts" not in st.session_state:
+        st.session_state.overview_selected_charts = OVERVIEW_CHARTS
+    selected = st.multiselect(
+        "选择展示的分析模块",
+        OVERVIEW_CHARTS,
+        default=st.session_state.overview_selected_charts,
+        key="overview_chart_selector"
+    )
+    st.session_state.overview_selected_charts = selected
 
     school_cur_p = preprocess(df_school_cur.copy())
     school_last_p = preprocess(df_school_last.copy())
@@ -664,51 +673,53 @@ def render_overview(df_school_cur, df_school_last, df_teacher_cur, df_teacher_la
 
     retention_data = calculate_teacher_retention_metrics(df_teacher_cur, df_teacher_last)
     teacher_retention_cur = retention_data["retention_rate"]
+    if "本周分析摘要" in selected:
+        render_ai_agent_panel(
+            df_school_cur=df_school_cur,
+            df_school_last=df_school_last,
+            school_count_cur=school_count_cur,
+            task_total_cur=task_total_cur,
+            task_total_last=task_total_last,
+            active_teacher_cur=active_teacher_cur,
+            active_teacher_last=active_teacher_last,
+            participation_cur=participation_cur,
+            participation_last=participation_last,
+            completion_cur=completion_cur,
+            completion_last=completion_last,
+            teacher_retention_cur=teacher_retention_cur,
+            retention_data=retention_data,
+            df_teacher_cur=df_teacher_cur,
+            df_teacher_last=df_teacher_last,
+            df_task_cur=df_task_cur,
+            df_task_last=df_task_last,
+            df_task_30d=df_task_30d,
+        )
 
-    render_ai_agent_panel(
-        df_school_cur=df_school_cur,
-        df_school_last=df_school_last,
-        school_count_cur=school_count_cur,
-        task_total_cur=task_total_cur,
-        task_total_last=task_total_last,
-        active_teacher_cur=active_teacher_cur,
-        active_teacher_last=active_teacher_last,
-        participation_cur=participation_cur,
-        participation_last=participation_last,
-        completion_cur=completion_cur,
-        completion_last=completion_last,
-        teacher_retention_cur=teacher_retention_cur,
-        retention_data=retention_data,
-        df_teacher_cur=df_teacher_cur,
-        df_teacher_last=df_teacher_last,
-        df_task_cur=df_task_cur,
-        df_task_last=df_task_last,
-        df_task_30d=df_task_30d,
-    )
     st.markdown("---")
-    st.subheader("🌍 全局指标总览")
-    st.markdown("### 核心指标（本周vs上周）")
+    if "核心指标" in selected:
+        st.subheader("🌍 全局指标总览")
+        st.markdown("### 核心指标（本周vs上周）")
 
-    row1 = st.columns(4)
-    with row1[0]:
-        metric_block("学校数量", school_count_cur, school_count_last)
-    with row1[1]:
-        metric_block("活跃老师数", active_teacher_cur, active_teacher_last)
-    with row1[2]:
-        metric_block("任务总数", task_total_cur, task_total_last)
-    with row1[3]:
-        delta = teacher_penetration_cur - teacher_penetration_last
-        st.metric("老师渗透率", f"{teacher_penetration_cur:.1f}%", f"{delta:+.1f}%")
+        row1 = st.columns(4)
+        with row1[0]:
+            metric_block("学校数量", school_count_cur, school_count_last)
+        with row1[1]:
+            metric_block("活跃老师数", active_teacher_cur, active_teacher_last)
+        with row1[2]:
+            metric_block("任务总数", task_total_cur, task_total_last)
+        with row1[3]:
+            delta = teacher_penetration_cur - teacher_penetration_last
+            st.metric("老师渗透率", f"{teacher_penetration_cur:.1f}%", f"{delta:+.1f}%")
 
-    row2 = st.columns(4)
-    with row2[0]:
-        metric_block("老师留存率", teacher_retention_cur, is_percent=True, show_delta=False)
-    with row2[1]:
-        metric_block("接收任务学生数", receive_students_cur, receive_students_last)
-    with row2[2]:
-        metric_block("参与率", participation_cur, participation_last, is_percent=True)
-    with row2[3]:
-        metric_block("参与后完成率", completion_cur, completion_last, is_percent=True)
+        row2 = st.columns(4)
+        with row2[0]:
+            metric_block("老师留存率", teacher_retention_cur, is_percent=True, show_delta=False)
+        with row2[1]:
+            metric_block("接收任务学生数", receive_students_cur, receive_students_last)
+        with row2[2]:
+            metric_block("参与率", participation_cur, participation_last, is_percent=True)
+        with row2[3]:
+            metric_block("参与后完成率", completion_cur, completion_last, is_percent=True)
 
     st.markdown("---")
     st.markdown("### 趋势与漏斗")
@@ -722,196 +733,200 @@ def render_overview(df_school_cur, df_school_last, df_teacher_cur, df_teacher_la
         key="overview_monthly_metrics"
     )
 
-    left_col, right_col = st.columns([1.2, 1], gap="large")
+    if "近30天趋势" in selected or "近7天 & 近30天漏斗" in selected:
+        st.markdown("---")
+        st.markdown("### 趋势与漏斗")
+        left_col, right_col = st.columns([1.2, 1], gap="large")
 
-    with left_col:
-        if df_task_30d is None or df_task_30d.empty or "任务发布时间" not in df_task_30d.columns:
-            st.info("暂无近30天任务数据，无法展示月趋势。")
-        else:
-            task_30d = df_task_30d.copy()
-            task_30d["任务发布时间"] = pd.to_datetime(task_30d["任务发布时间"], errors="coerce")
-            task_30d = task_30d.dropna(subset=["任务发布时间"]).copy()
-            task_30d["日期"] = task_30d["任务发布时间"].dt.date
-
-            for col in ["接收任务学生数", "打开任务学生数", "完成任务学生数"]:
-                if col in task_30d.columns:
-                    task_30d[col] = pd.to_numeric(task_30d[col], errors="coerce").fillna(0)
+        with left_col:
+            if "近30天趋势" in selected:
+                if df_task_30d is None or df_task_30d.empty or "任务发布时间" not in df_task_30d.columns:
+                    st.info("暂无近30天任务数据，无法展示月趋势。")
                 else:
-                    task_30d[col] = 0
+                    task_30d = df_task_30d.copy()
+                    task_30d["任务发布时间"] = pd.to_datetime(task_30d["任务发布时间"], errors="coerce")
+                    task_30d = task_30d.dropna(subset=["任务发布时间"]).copy()
+                    task_30d["日期"] = task_30d["任务发布时间"].dt.date
 
-            if "老师姓名" not in task_30d.columns:
-                task_30d["老师姓名"] = None
+                    for col in ["接收任务学生数", "打开任务学生数", "完成任务学生数"]:
+                        if col in task_30d.columns:
+                            task_30d[col] = pd.to_numeric(task_30d[col], errors="coerce").fillna(0)
+                        else:
+                            task_30d[col] = 0
 
-            trend_df = (
-                task_30d.groupby("日期", as_index=False)
-                .agg(
-                    任务总数=("任务发布时间", "count"),
-                    活跃老师数=("老师姓名", lambda x: x.dropna().astype(str).str.strip().nunique()),
-                    接收任务学生数=("接收任务学生数", "sum"),
-                    打开任务学生数=("打开任务学生数", "sum"),
-                    完成任务学生数=("完成任务学生数", "sum"),
-                )
-                .sort_values("日期")
-            )
+                    if "老师姓名" not in task_30d.columns:
+                        task_30d["老师姓名"] = None
 
-            trend_df["参与率"] = trend_df.apply(
-                lambda x: x["打开任务学生数"] / x["接收任务学生数"] * 100 if x["接收任务学生数"] > 0 else 0,
-                axis=1
-            )
-            trend_df["参与后完成率"] = trend_df.apply(
-                lambda x: x["完成任务学生数"] / x["打开任务学生数"] * 100 if x["打开任务学生数"] > 0 else 0,
-                axis=1
-            )
+                    trend_df = (
+                        task_30d.groupby("日期", as_index=False)
+                        .agg(
+                            任务总数=("任务发布时间", "count"),
+                            活跃老师数=("老师姓名", lambda x: x.dropna().astype(str).str.strip().nunique()),
+                            接收任务学生数=("接收任务学生数", "sum"),
+                            打开任务学生数=("打开任务学生数", "sum"),
+                            完成任务学生数=("完成任务学生数", "sum"),
+                        )
+                        .sort_values("日期")
+                    )
 
-            fig_trend = make_subplots(specs=[[{"secondary_y": True}]])
+                    trend_df["参与率"] = trend_df.apply(
+                        lambda x: x["打开任务学生数"] / x["接收任务学生数"] * 100 if x["接收任务学生数"] > 0 else 0,
+                        axis=1
+                    )
+                    trend_df["参与后完成率"] = trend_df.apply(
+                        lambda x: x["完成任务学生数"] / x["打开任务学生数"] * 100 if x["打开任务学生数"] > 0 else 0,
+                        axis=1
+                    )
 
-            color_map = {
-                "任务总数": COLOR_PRIMARY,
-                "活跃老师数": COLOR_WARN,
-                "参与率": COLOR_SECOND,
-                "参与后完成率": COLOR_DANGER,
-            }
+                    fig_trend = make_subplots(specs=[[{"secondary_y": True}]])
 
-            count_metrics = [m for m in selected_metrics if m in ["任务总数", "活跃老师数"]]
-            rate_metrics = [m for m in selected_metrics if m in ["参与率", "参与后完成率"]]
+                    color_map = {
+                        "任务总数": COLOR_PRIMARY,
+                        "活跃老师数": COLOR_WARN,
+                        "参与率": COLOR_SECOND,
+                        "参与后完成率": COLOR_DANGER,
+                    }
 
-            for metric in count_metrics:
-                fig_trend.add_trace(
-                    go.Scatter(
-                        x=trend_df["日期"],
-                        y=trend_df[metric],
-                        mode="lines+markers",
-                        name=metric,
-                        line=dict(width=2.5, color=color_map[metric]),
-                        marker=dict(size=5, color=color_map[metric]),
-                        hovertemplate="%{x}<br>" + metric + "：%{y:,.0f}<extra></extra>"
-                    ),
-                    secondary_y=False
-                )
+                    count_metrics = [m for m in selected_metrics if m in ["任务总数", "活跃老师数"]]
+                    rate_metrics = [m for m in selected_metrics if m in ["参与率", "参与后完成率"]]
 
-            for metric in rate_metrics:
-                fig_trend.add_trace(
-                    go.Scatter(
-                        x=trend_df["日期"],
-                        y=trend_df[metric],
-                        mode="lines+markers",
-                        name=metric,
-                        line=dict(width=2.5, color=color_map[metric]),
-                        marker=dict(size=5, color=color_map[metric]),
-                        hovertemplate="%{x}<br>" + metric + "：%{y:.1f}%<extra></extra>"
-                    ),
-                    secondary_y=True
-                )
+                    for metric in count_metrics:
+                        fig_trend.add_trace(
+                            go.Scatter(
+                                x=trend_df["日期"],
+                                y=trend_df[metric],
+                                mode="lines+markers",
+                                name=metric,
+                                line=dict(width=2.5, color=color_map[metric]),
+                                marker=dict(size=5, color=color_map[metric]),
+                                hovertemplate="%{x}<br>" + metric + "：%{y:,.0f}<extra></extra>"
+                            ),
+                            secondary_y=False
+                        )
 
-            fig_trend.update_layout(
-                plot_bgcolor=CARD_BG,
-                paper_bgcolor=CARD_BG,
-                font=dict(color=TEXT_COLOR),
-                margin=dict(l=26, r=26, t=22, b=52),
-                legend=dict(orientation="h", y=-0.18, x=0.5, xanchor="center"),
-                height=320,
-                hovermode="x unified"
-            )
+                    for metric in rate_metrics:
+                        fig_trend.add_trace(
+                            go.Scatter(
+                                x=trend_df["日期"],
+                                y=trend_df[metric],
+                                mode="lines+markers",
+                                name=metric,
+                                line=dict(width=2.5, color=color_map[metric]),
+                                marker=dict(size=5, color=color_map[metric]),
+                                hovertemplate="%{x}<br>" + metric + "：%{y:.1f}%<extra></extra>"
+                            ),
+                            secondary_y=True
+                        )
 
-            fig_trend.update_xaxes(
-                title_text="",
-                showgrid=False,
-                tickfont=dict(color=SUB_TEXT_COLOR),
-                title_font=dict(color=TEXT_COLOR)
-            )
-            fig_trend.update_yaxes(
-                title_text="数量指标",
-                secondary_y=False,
-                showgrid=True,
-                gridcolor=GRID_COLOR,
-                zeroline=False,
-                tickfont=dict(color=SUB_TEXT_COLOR),
-                title_font=dict(color=TEXT_COLOR)
-            )
-            fig_trend.update_yaxes(
-                title_text="比例指标（%）",
-                secondary_y=True,
-                showgrid=False,
-                zeroline=False,
-                range=[0, 100],
-                tickfont=dict(color=SUB_TEXT_COLOR),
-                title_font=dict(color=TEXT_COLOR)
-            )
+                    fig_trend.update_layout(
+                        plot_bgcolor=CARD_BG,
+                        paper_bgcolor=CARD_BG,
+                        font=dict(color=TEXT_COLOR),
+                        margin=dict(l=26, r=26, t=22, b=52),
+                        legend=dict(orientation="h", y=-0.18, x=0.5, xanchor="center"),
+                        height=320,
+                        hovermode="x unified"
+                    )
 
-            render_chart_card(fig_trend, title="近30天趋势")
+                    fig_trend.update_xaxes(
+                        title_text="",
+                        showgrid=False,
+                        tickfont=dict(color=SUB_TEXT_COLOR),
+                        title_font=dict(color=TEXT_COLOR)
+                    )
+                    fig_trend.update_yaxes(
+                        title_text="数量指标",
+                        secondary_y=False,
+                        showgrid=True,
+                        gridcolor=GRID_COLOR,
+                        zeroline=False,
+                        tickfont=dict(color=SUB_TEXT_COLOR),
+                        title_font=dict(color=TEXT_COLOR)
+                    )
+                    fig_trend.update_yaxes(
+                        title_text="比例指标（%）",
+                        secondary_y=True,
+                        showgrid=False,
+                        zeroline=False,
+                        range=[0, 100],
+                        tickfont=dict(color=SUB_TEXT_COLOR),
+                        title_font=dict(color=TEXT_COLOR)
+                    )
 
-    with right_col:
-        if df_task_30d is None or df_task_30d.empty:
-            st.info("暂无近30天任务数据，无法展示漏斗分析。")
-        else:
-            task_30d = df_task_30d.copy()
-            for col in ["接收任务学生数", "打开任务学生数", "完成任务学生数"]:
-                if col in task_30d.columns:
-                    task_30d[col] = pd.to_numeric(task_30d[col], errors="coerce").fillna(0)
-                else:
-                    task_30d[col] = 0
+                    render_chart_card(fig_trend, title="近30天趋势")
 
-            task_7d = pd.DataFrame()
-            if df_task_cur is not None and not df_task_cur.empty:
-                task_7d = df_task_cur.copy()
-                for col in ["接收任务学生数", "打开任务学生数", "完成任务学生数"]:
-                    if col in task_7d.columns:
-                        task_7d[col] = pd.to_numeric(task_7d[col], errors="coerce").fillna(0)
-                    else:
-                        task_7d[col] = 0
-
-            def summarize_funnel(df):
-                if df is None or df.empty:
-                    return {"receive": 0, "open": 0, "finish": 0,
-                            "open_rate": 0, "finish_after_open_rate": 0, "total_finish_rate": 0}
-                total_receive = df["接收任务学生数"].sum()
-                total_open = df["打开任务学生数"].sum()
-                total_finish = df["完成任务学生数"].sum()
-                return {
-                    "receive": total_receive, "open": total_open, "finish": total_finish,
-                    "open_rate": total_open / total_receive * 100 if total_receive > 0 else 0,
-                    "finish_after_open_rate": total_finish / total_open * 100 if total_open > 0 else 0,
-                    "total_finish_rate": total_finish / total_receive * 100 if total_receive > 0 else 0
-                }
-
-            week_stats = summarize_funnel(task_7d)
-            month_stats = summarize_funnel(task_30d)
-
-            def build_funnel_chart(stats, title):
-                funnel_df = pd.DataFrame({
-                    "阶段": ["接收", "打开", "完成"],
-                    "人数": [stats["receive"], stats["open"], stats["finish"]]
-                })
-                fig = px.funnel(
-                    funnel_df, x="人数", y="阶段", color="阶段",
-                    category_orders={"阶段": ["接收", "打开", "完成"]},
-                    color_discrete_map={"接收": "#6FAFE0", "打开": "#3B5998", "完成": "#7BCFA6"}
-                )
-                fig.update_traces(texttemplate="%{x:,.0f}", textposition="inside")
-                fig.update_layout(
-                    height=240, plot_bgcolor=CARD_BG, paper_bgcolor=CARD_BG,
-                    font=dict(color=TEXT_COLOR), margin=dict(l=18, r=18, t=12, b=12),
-                    showlegend=False
-                )
-                fig.update_xaxes(title_text="", showgrid=False, zeroline=False, tickfont=dict(color=SUB_TEXT_COLOR))
-                fig.update_yaxes(title_text="", showgrid=False, zeroline=False, tickfont=dict(color=TEXT_COLOR))
-                return fig
-
-            funnel_left, funnel_right = st.columns(2, gap="small")
-            with funnel_left:
-                fig_week = build_funnel_chart(week_stats, "近7天漏斗")
-                render_chart_card(fig_week, title="近7天漏斗")
-            with funnel_right:
-                fig_month = build_funnel_chart(month_stats, "近30天漏斗")
-                render_chart_card(fig_month, title="近30天漏斗")
-
-            if week_stats["total_finish_rate"] > month_stats["total_finish_rate"] + 2:
-                conclusion = "近7天总完成率高于近30天平均水平，近期任务转化表现有所改善。"
-            elif week_stats["total_finish_rate"] < month_stats["total_finish_rate"] - 2:
-                conclusion = "近7天总完成率低于近30天平均水平，近期任务转化有所走弱，建议关注最新任务触达与完成情况。"
+        with right_col:
+            if df_task_30d is None or df_task_30d.empty:
+                st.info("暂无近30天任务数据，无法展示漏斗分析。")
             else:
-                conclusion = "近7天与近30天整体转化水平基本一致，近期表现相对稳定。"
+                task_30d = df_task_30d.copy()
+                for col in ["接收任务学生数", "打开任务学生数", "完成任务学生数"]:
+                    if col in task_30d.columns:
+                        task_30d[col] = pd.to_numeric(task_30d[col], errors="coerce").fillna(0)
+                    else:
+                        task_30d[col] = 0
 
-            st.markdown(f'''<div style="margin-top:8px;background:#F8FBFF;border:1px solid #E5EAF3;border-radius:14px;padding:12px 14px;color:#425466;font-size:13px;line-height:1.6;">
-<b style="color:#16324F;"></b>{conclusion}
-</div>''', unsafe_allow_html=True)
+                task_7d = pd.DataFrame()
+                if df_task_cur is not None and not df_task_cur.empty:
+                    task_7d = df_task_cur.copy()
+                    for col in ["接收任务学生数", "打开任务学生数", "完成任务学生数"]:
+                        if col in task_7d.columns:
+                            task_7d[col] = pd.to_numeric(task_7d[col], errors="coerce").fillna(0)
+                        else:
+                            task_7d[col] = 0
+
+                def summarize_funnel(df):
+                    if df is None or df.empty:
+                        return {"receive": 0, "open": 0, "finish": 0,
+                                "open_rate": 0, "finish_after_open_rate": 0, "total_finish_rate": 0}
+                    total_receive = df["接收任务学生数"].sum()
+                    total_open = df["打开任务学生数"].sum()
+                    total_finish = df["完成任务学生数"].sum()
+                    return {
+                        "receive": total_receive, "open": total_open, "finish": total_finish,
+                        "open_rate": total_open / total_receive * 100 if total_receive > 0 else 0,
+                        "finish_after_open_rate": total_finish / total_open * 100 if total_open > 0 else 0,
+                        "total_finish_rate": total_finish / total_receive * 100 if total_receive > 0 else 0
+                    }
+
+                week_stats = summarize_funnel(task_7d)
+                month_stats = summarize_funnel(task_30d)
+
+                def build_funnel_chart(stats, title):
+                    funnel_df = pd.DataFrame({
+                        "阶段": ["接收", "打开", "完成"],
+                        "人数": [stats["receive"], stats["open"], stats["finish"]]
+                    })
+                    fig = px.funnel(
+                        funnel_df, x="人数", y="阶段", color="阶段",
+                        category_orders={"阶段": ["接收", "打开", "完成"]},
+                        color_discrete_map={"接收": "#6FAFE0", "打开": "#3B5998", "完成": "#7BCFA6"}
+                    )
+                    fig.update_traces(texttemplate="%{x:,.0f}", textposition="inside")
+                    fig.update_layout(
+                        height=240, plot_bgcolor=CARD_BG, paper_bgcolor=CARD_BG,
+                        font=dict(color=TEXT_COLOR), margin=dict(l=18, r=18, t=12, b=12),
+                        showlegend=False
+                    )
+                    fig.update_xaxes(title_text="", showgrid=False, zeroline=False, tickfont=dict(color=SUB_TEXT_COLOR))
+                    fig.update_yaxes(title_text="", showgrid=False, zeroline=False, tickfont=dict(color=TEXT_COLOR))
+                    return fig
+
+                funnel_left, funnel_right = st.columns(2, gap="small")
+                with funnel_left:
+                    fig_week = build_funnel_chart(week_stats, "近7天漏斗")
+                    render_chart_card(fig_week, title="近7天漏斗")
+                with funnel_right:
+                    fig_month = build_funnel_chart(month_stats, "近30天漏斗")
+                    render_chart_card(fig_month, title="近30天漏斗")
+
+                if week_stats["total_finish_rate"] > month_stats["total_finish_rate"] + 2:
+                    conclusion = "近7天总完成率高于近30天平均水平，近期任务转化表现有所改善。"
+                elif week_stats["total_finish_rate"] < month_stats["total_finish_rate"] - 2:
+                    conclusion = "近7天总完成率低于近30天平均水平，近期任务转化有所走弱，建议关注最新任务触达与完成情况。"
+                else:
+                    conclusion = "近7天与近30天整体转化水平基本一致，近期表现相对稳定。"
+
+                st.markdown(f'''<div style="margin-top:8px;background:#F8FBFF;border:1px solid #E5EAF3;border-radius:14px;padding:12px 14px;color:#425466;font-size:13px;line-height:1.6;">
+    <b style="color:#16324F;"></b>{conclusion}
+    </div>''', unsafe_allow_html=True)
