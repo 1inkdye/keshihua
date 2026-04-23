@@ -510,7 +510,7 @@ min-height:320px;
 
             st.markdown(
                 f"""<div style="display:flex;gap:12px;flex-wrap:wrap;">
-<div style="flex:1;min-width:120px;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
+<div style="flex:1;min-width:120px;padding:12px 16px;background:#FFFFFF;border:1px solid #E5EAF3;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
 <div style="font-size:11px;color:#8FA3BF;margin-bottom:4px;">学生参与率均值</div>
 <div style="display:flex;align-items:baseline;gap:8px;">
 <div style="font-size:22px;font-weight:700;color:#7BCFA6;">
@@ -525,7 +525,7 @@ min-height:320px;
 </div>
 </div>
 
-<div style="flex:1;min-width:120px;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
+<div style="flex:1;min-width:120px;padding:12px 16px;background:#FFFFFF;border:1px solid #E5EAF3;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
 <div style="font-size:11px;color:#8FA3BF;margin-bottom:4px;">学生完成率均值（参与后）</div>
 <div style="display:flex;align-items:baseline;gap:8px;">
 <div style="font-size:22px;font-weight:700;color:#F2A541;">
@@ -540,7 +540,7 @@ min-height:320px;
 </div>
 </div>
 
-<div style="flex:1;min-width:120px;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
+<div style="flex:1;min-width:120px;padding:12px 16px;background:#FFFFFF;border:1px solid #E5EAF3;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);">
 <div style="font-size:11px;color:#8FA3BF;margin-bottom:4px;">结论</div>
 <div style="font-size:12px;color:#16324F;line-height:1.7;margin-top:2px;">
 共 <b>{total_teachers}</b> 位老师，有效样本（任务≥{MIN_TASK}）<b>{len(teacher_valid)}</b> 位。建议关注参与率高但完成率低的老师，优化任务质量与学生跟进链路。
@@ -1032,14 +1032,14 @@ line-height:1.75;
                 st.markdown(f"""
 <div style="display:flex;flex-direction:column;gap:12px;">
 
-<div class="custom-analytic-card" style="padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:#16324F;font-size:13px;line-height:1.7;">
+<div class="custom-analytic-card" style="padding:12px 14px;background:#FFFFFF;border:1px solid #E5EAF3;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);color:#16324F;font-size:13px;line-height:1.7;">
 <div style="font-weight:700;margin-bottom:6px;">当前校区：<span style="color:#60A5FA;">{selected_school}</span></div>
 <div>共覆盖 <b>{len(school_summary)}</b> 个科目。</div>
 <div>平均参与率 <span style="color:#60A5FA;font-weight:700;">{avg_part:.1f}%</span></div>
 <div>平均参与后完成率 <span style="color:#34D399;font-weight:700;">{avg_finish:.1f}%</span></div>
 </div>
 
-<div class="custom-analytic-card" style="padding:12px 14px;background:linear-gradient(90deg, rgba(96,165,250,0.06), rgba(52,211,153,0.06));border:1px solid #E5EAF3;border-radius:12px;color:#16324F;font-size:13px;line-height:1.75;">
+<div class="custom-analytic-card" style="padding:12px 14px;background:#FFFFFF;border:1px solid #E5EAF3;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.04);color:#16324F;font-size:13px;line-height:1.75;">
 <div style="font-weight:700;margin-bottom:6px;">关键观察</div>
 <div>当前综合排序领先科目：<b>{top_subject}</b></div>
 <div>参与率最高科目：<span style="color:#3B82F6;font-weight:700;">{top_part}</span></div>

@@ -45,7 +45,7 @@ html, body, [class*="css"] {
 
 .ai-summary-card {
     margin: 8px 0 18px 0;
-    padding: 18px 24px 20px 24px;
+    padding: 16px 20px 16px 20px;
     border-radius: 20px;
     border: 1px solid rgba(59, 89, 152, 0.15);
     background: #FFFFFF;
@@ -54,24 +54,25 @@ html, body, [class*="css"] {
 
 .ai-summary-title {
     color: #16324F;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 700;
     line-height: 1.3;
 }
 
 .ai-summary-toggle {
     color: #6B7A90;
-    font-size: 12px;
+    font-size: 11px;
     line-height: 1;
+    margin-top: 2px;
 }
 
 .ai-summary-headline {
-    color: #16324F;
-    font-size: 13px;
-    line-height: 1.7;
-    margin-bottom: 14px;
-    padding: 10px 12px;
-    border-radius: 12px;
+    color: #425466;
+    font-size: 12.5px;
+    line-height: 1.65;
+    margin: 8px 0 12px 0;
+    padding: 8px 12px;
+    border-radius: 10px;
     background: rgba(0,0,0,0.02);
     border: 1px solid rgba(0,0,0,0.06);
 }
@@ -79,26 +80,13 @@ html, body, [class*="css"] {
 .ai-summary-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 22px;
-    margin-bottom: 16px;
+    gap: 16px;
 }
 
-.ai-summary-col ul {
-    list-style: disc;
-    margin: 0;
-    padding-left: 18px;
-    color: #16324F;
-    line-height: 1.7;
-    font-size: 13px;
-}
-
-.ai-summary-col li {
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(0,0,0,0.06);
-}
-
-.ai-summary-col li:last-child {
-    border-bottom: none;
+.ai-summary-col-title {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 6px;
 }
 
 .ai-summary-col-title-good {
@@ -107,6 +95,24 @@ html, body, [class*="css"] {
 
 .ai-summary-col-title-warn {
     color: #D97706;
+}
+
+.ai-summary-col ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    color: #16324F;
+    font-size: 12.5px;
+}
+
+.ai-summary-col li {
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(0,0,0,0.05);
+    line-height: 1.6;
+}
+
+.ai-summary-col li:last-child {
+    border-bottom: none;
 }
 
 @media (max-width: 900px) {
@@ -781,7 +787,7 @@ def render_dashboard():
             st.markdown('<div class="top-nav-title">🏠 作业任务数据看板</div>', unsafe_allow_html=True)
 
         with nav_mid:
-            nav1, nav2, nav3 = st.columns(3)
+            nav1, nav2 = st.columns(2)
 
             with nav1:
                 if st.button(
@@ -801,16 +807,6 @@ def render_dashboard():
                         type="primary" if st.session_state.top_nav_mode == "school" else "secondary"
                 ):
                     st.session_state.top_nav_mode = "school"
-                    st.rerun()
-
-            with nav3:
-                if st.button(
-                        "老师画像",
-                        key="top_nav_teacher",
-                        use_container_width=True,
-                        type="primary" if st.session_state.top_nav_mode == "teacher" else "secondary"
-                ):
-                    st.session_state.top_nav_mode = "teacher"
                     st.rerun()
 
         with nav_right:

@@ -276,7 +276,6 @@ def render_ai_agent_panel(
     st.markdown(f'''<div class="custom-analytic-card ai-summary-card">
 <div class="ai-summary-top">
 <div class="ai-summary-title">本周分析摘要</div>
-<div class="ai-summary-toggle">{title_suffix}</div>
 </div>
 <div class="ai-summary-headline">{'；'.join(headline_parts)}。</div>
 <div class="ai-summary-grid">
@@ -688,7 +687,7 @@ def render_overview(df_school_cur, df_school_last, df_teacher_cur, df_teacher_la
     )
     st.markdown("---")
     st.subheader("🌍 全局指标总览")
-    st.markdown("### 核心指标")
+    st.markdown("### 核心指标（本周vs上周）")
 
     row1 = st.columns(4)
     with row1[0]:
@@ -808,8 +807,8 @@ def render_overview(df_school_cur, df_school_last, df_teacher_cur, df_teacher_la
                 plot_bgcolor=CARD_BG,
                 paper_bgcolor=CARD_BG,
                 font=dict(color=TEXT_COLOR),
-                margin=dict(l=26, r=26, t=22, b=18),
-                legend=dict(orientation="h", y=1.06, x=0),
+                margin=dict(l=26, r=26, t=22, b=52),
+                legend=dict(orientation="h", y=-0.18, x=0.5, xanchor="center"),
                 height=320,
                 hovermode="x unified"
             )
