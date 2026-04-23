@@ -1,4 +1,4 @@
-import textwrap
+﻿import textwrap
 from plotly.subplots import make_subplots
 import math
 import plotly.graph_objects as go
@@ -23,8 +23,8 @@ COLOR_WARN = "#FF9900"
 COLOR_DANGER = "#B36D61"
 COLOR_NEUTRAL = "#7F8EA3"
 
-TEXT_COLOR = "#EAF1FF"
-SUB_TEXT_COLOR = "#A9B8D4"
+TEXT_COLOR = "#16324F"
+SUB_TEXT_COLOR = "#6B7A90"
 # 页面状态初始化
 
 def render_rank_card(
@@ -62,7 +62,7 @@ def render_rank_card(
     for i, row in show_df.iterrows():
         rank = i + 1
         badge_bg = rank_colors[rank - 1] if rank <= 3 else "#374151"
-        divider = "" if i == len(show_df) - 1 else "border-bottom: 1px solid rgba(255,255,255,0.07);"
+        divider = "" if i == len(show_df) - 1 else "border-bottom: 1px solid #E5EAF3;"
 
         main_val = row[value_col]
         if pd.isna(main_val):
@@ -86,8 +86,8 @@ def render_rank_card(
 <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1.8;">
 <div style="width:26px;height:26px;border-radius:7px;background:{badge_bg};color:white;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">{rank}</div>
 <div style="min-width:0;">
-<div style="font-size:14px;font-weight:600;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{row[name_col]}</div>
-<div style="font-size:10px;color:#8FA3BF;margin-top:1px;line-height:1.2;">{sub_text}</div>
+<div style="font-size:14px;font-weight:600;color:#16324F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{row[name_col]}</div>
+<div style="font-size:10px;color:#6B7A90;margin-top:1px;line-height:1.2;">{sub_text}</div>
 </div>
 </div>
 <div style="text-align:right;flex:1;">
@@ -97,7 +97,7 @@ def render_rank_card(
 
     height_style = f"height:{height}px;" if height else ""
 
-    full_html = f"""<div class="rank-board-card" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px 20px;{height_style}overflow:auto;">{rows_html}
+    full_html = f"""<div class="rank-board-card" style="background:#FFFFFF;border:1px solid #E5EAF3;border-radius:16px;padding:16px 20px;{height_style}overflow:auto;">{rows_html}
 </div>"""
     st.markdown(full_html, unsafe_allow_html=True)
 
@@ -191,28 +191,28 @@ div[data-testid="stButton"] > button {
 }
 
 div[data-testid="stButton"] > button[kind="secondary"] {
-    background: rgba(255,255,255,0.02) !important;
-    border: 1px solid rgba(255,255,255,0.10) !important;
-    color: #EAF1FF !important;
+    background: #FFFFFF !important;
+    border: 1px solid #D7E1EE !important;
+    color: #16324F !important;
 }
 
 div[data-testid="stButton"] > button[kind="secondary"]:hover {
-    border: 1px solid rgba(255,255,255,0.28) !important;
-    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid #9EC3EB !important;
+    background: #F5F8FC !important;
 }
 
 div[data-testid="stButton"] > button[kind="primary"] {
-    background: rgba(76,120,168,0.26) !important;
+    background: #DCEAFE !important;
     border: 1px solid #78A8E0 !important;
-    color: #EAF1FF !important;
+    color: #16324F !important;
     box-shadow: 0 0 0 1px rgba(120,168,224,0.18) inset !important;
 }
 
 .school-top-card {
     padding: 10px 14px;
     border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.08);
-    background: rgba(255,255,255,0.03);
+    border: 1px solid #E5EAF3;
+    background: #FFFFFF;
     margin-bottom: 12px;
 }
 
@@ -225,7 +225,7 @@ div[data-testid="stButton"] > button[kind="primary"] {
 .school-top-name {
     font-size: 20px;
     font-weight: 700;
-    color: #EAF1FF;
+    color: #16324F;
     margin-bottom: 4px;
 }
 
@@ -332,7 +332,7 @@ def render_detail_analysis(
     <hr style="
         height:1px;
         border:none;
-        background-color:#EAF1FF;
+        background-color:#E5EAF3;
         margin:0 0;
     ">
     """, unsafe_allow_html=True)
@@ -447,7 +447,7 @@ def render_detail_analysis(
             fill_value=0
         )
 
-        st.markdown(f"""<div class="custom-analytic-card" style="margin:6px 0 14px 0;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;font-size:13px;line-height:1.7;color:#EAF1FF;">当前学校分布中，<span style="color:#7BCFA6;font-weight:700;">高参与·高完成</span>学校
+        st.markdown(f"""<div class="custom-analytic-card" style="margin:6px 0 14px 0;padding:10px 14px;background:#F8FBFF;border:1px solid #E5EAF3;border-radius:12px;font-size:13px;line-height:1.7;color:#334155;">当前学校分布中，<span style="color:#7BCFA6;font-weight:700;">高参与·高完成</span>学校
     <span style="font-weight:700;">{quad_summary['高参与·高完成']}</span>所，
     <span style="color:#4C78A8;font-weight:700;">高参与·低完成</span>学校
     <span style="font-weight:700;">{quad_summary['高参与·低完成']}</span>所，
@@ -737,13 +737,13 @@ def render_detail_analysis(
                     rate2 = row["参与后完成率"]
                     rank = i + 1
                     badge_bg = rank_colors[rank - 1] if rank <= 3 else "#374151"
-                    divider = "" if i == len(summary) - 1 else "border-bottom: 1px solid rgba(255,255,255,0.06);"
+                    divider = "" if i == len(summary) - 1 else "border-bottom: 1px solid #E5EAF3;"
 
                     rows_html += f"""
 <div class="rank-board-row" style="display:flex;align-items:center;padding:8px 10px;{divider}">
 <div style="display:flex;align-items:center;gap:10px;flex:2;">
 <div style="width:26px;height:26px;border-radius:7px;background:{badge_bg};color:white;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">{rank}</div>
-<div style="font-size:14px;font-weight:600;color:white;line-height:1.2;">{row['科目']}</div>
+<div style="font-size:14px;font-weight:600;color:#16324F;line-height:1.2;">{row['科目']}</div>
 </div>
 <div style="flex:1;text-align:center;">
 <div style="font-size:14px;font-weight:700;color:#60A5FA;line-height:1.2;">{rate1:.1f}%</div>
@@ -758,8 +758,8 @@ def render_detail_analysis(
 
                 full_html = f"""
 <div class="rank-board-card" style="
-background:rgba(255,255,255,0.03);
-border:1px solid rgba(255,255,255,0.08);
+background:#FFFFFF;
+border:1px solid #E5EAF3;
 border-radius:14px;
 padding:10px 14px;
 height:325px;
@@ -838,7 +838,7 @@ overflow:auto;
                     x=[max_val] * len(change_df),
                     y=change_df["学校"],
                     orientation="h",
-                    marker=dict(color="rgba(255,255,255,0.06)", line_width=0),
+                    marker=dict(color="rgba(148,163,184,0.14)", line_width=0),
                     showlegend=False,
                     hoverinfo="skip"
                 ))
@@ -847,7 +847,7 @@ overflow:auto;
                     x=[-max_val] * len(change_df),
                     y=change_df["学校"],
                     orientation="h",
-                    marker=dict(color="rgba(255,255,255,0.06)", line_width=0),
+                    marker=dict(color="rgba(148,163,184,0.14)", line_width=0),
                     showlegend=False,
                     hoverinfo="skip"
                 ))
@@ -882,7 +882,7 @@ overflow:auto;
                         range=[-max_val * 1.05, max_val * 1.05],
                         showgrid=False,
                         zeroline=True,
-                        zerolinecolor="rgba(255,255,255,0.18)",
+                        zerolinecolor="#D7E1EE",
                         zerolinewidth=1.2,
                         tickfont=dict(color=SUB_TEXT_COLOR, size=11),
                         showline=False
@@ -989,7 +989,7 @@ overflow:auto;
     <hr style="
     height:0px;
     border:none;
-    background-color:#EAF1FF;
+    background-color:#E5EAF3;
     margin:0 0;
     ">
     """, unsafe_allow_html=True)
@@ -1058,33 +1058,33 @@ overflow:auto;
             st.markdown("#### 老师留存率")
 
             st.markdown(f"""
-    <div class="custom-analytic-card" style="height: 400px;overflow: hidden;display: flex;flex-direction: column;justify-content: space-between;background:#1A2335;border: 1px solid rgba(255,255,255,0.08);border-left: 4px solid {COLOR_SECOND};border-radius: 18px;padding: 16px 18px;"><div>
-    <div style="font-size:13px;color:#A9B8D4;font-weight:600;">老师留存率</div>
-    <div style="font-size:24px;font-weight:800;color:#F8FAFC;line-height:1.15;margin-top:3px;">
+    <div class="custom-analytic-card" style="height: 400px;overflow: hidden;display: flex;flex-direction: column;justify-content: space-between;background:#FFFFFF;border: 1px solid #E5EAF3;border-left: 4px solid {COLOR_SECOND};border-radius: 18px;padding: 16px 18px;"><div>
+    <div style="font-size:13px;color:#6B7A90;font-weight:600;">老师留存率</div>
+    <div style="font-size:24px;font-weight:800;color:#16324F;line-height:1.15;margin-top:3px;">
     {retention_rate:.1f}%
     </div>
-    <div style="font-size:12px;color:#7F8EA3;margin-top:3px;">
+    <div style="font-size:12px;color:#6B7A90;margin-top:3px;">
     上周活跃老师中，本周仍然活跃的比例
     </div>
     </div>
     
     <div>
-    <div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-    <div style="font-size:13px;color:#A9B8D4;">留存老师</div>
+    <div style="padding:8px 0;border-bottom:1px solid #E5EAF3;">
+    <div style="font-size:13px;color:#6B7A90;">留存老师</div>
     <div style="font-size:24px;font-weight:800;color:{COLOR_SECOND};">{retain}</div>
-    <div style="font-size:12px;color:#7F8EA3;">占本周活跃老师 {retain_ratio:.1f}%</div>
+    <div style="font-size:12px;color:#6B7A90;">占本周活跃老师 {retain_ratio:.1f}%</div>
     </div>
     
-    <div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-    <div style="font-size:13px;color:#A9B8D4;">新增老师</div>
+    <div style="padding:8px 0;border-bottom:1px solid #E5EAF3;">
+    <div style="font-size:13px;color:#6B7A90;">新增老师</div>
     <div style="font-size:24px;font-weight:800;color:{COLOR_PRIMARY};">{new}</div>
-    <div style="font-size:12px;color:#7F8EA3;">占本周活跃老师 {new_ratio:.1f}%</div>
+    <div style="font-size:12px;color:#6B7A90;">占本周活跃老师 {new_ratio:.1f}%</div>
     </div>
     
     <div style="padding:8px 0 0 0;">
-    <div style="font-size:13px;color:#A9B8D4;">流失老师</div>
+    <div style="font-size:13px;color:#6B7A90;">流失老师</div>
     <div style="font-size:24px;font-weight:800;color:{COLOR_DANGER};">{lost}</div>
-    <div style="font-size:12px;color:#7F8EA3;">占上周活跃老师 {lost_ratio_last:.1f}%</div>
+    <div style="font-size:12px;color:#6B7A90;">占上周活跃老师 {lost_ratio_last:.1f}%</div>
     </div>
     </div>
     </div>
@@ -1097,38 +1097,38 @@ overflow:auto;
             delta_color = "#4ADE80" if penetration_delta >= 0 else "#F87171"
 
             st.markdown(f"""
-    <div class="custom-analytic-card" style="height: 400px;overflow: hidden;display: flex;flex-direction: column;justify-content: space-between;background: #1A2335;border: 1px solid rgba(255,255,255,0.08);border-left: 4px solid {COLOR_WARN};border-radius: 18px;padding: 16px 18px;"><div>
-    <div style="font-size:13px;color:#A9B8D4;font-weight:600;">近7天老师渗透率</div>
+    <div class="custom-analytic-card" style="height: 400px;overflow: hidden;display: flex;flex-direction: column;justify-content: space-between;background: #FFFFFF;border: 1px solid #E5EAF3;border-left: 4px solid {COLOR_WARN};border-radius: 18px;padding: 16px 18px;"><div>
+    <div style="font-size:13px;color:#6B7A90;font-weight:600;">近7天老师渗透率</div>
     <div style="display:flex;align-items:baseline;gap:10px;margin-top:3px;">
-    <div style="font-size:24px;font-weight:800;color:#F8FAFC;line-height:1.15;">
+    <div style="font-size:24px;font-weight:800;color:#16324F;line-height:1.15;">
     {teacher_penetration_cur:.1f}%
     </div>
     <div style="font-size:13px;font-weight:700;color:{delta_color};">
     {penetration_delta:+.1f}%
     </div>
     </div>
-    <div style="font-size:12px;color:#7F8EA3;margin-top:3px;">
+    <div style="font-size:12px;color:#6B7A90;margin-top:3px;">
     近7天活跃老师 / 近30天老师池
     </div>
     </div>
     
     <div style="background: linear-gradient(90deg, rgba(255,190,60,0.10) 0%, rgba(255,190,60,0.06) 100%);border: 1px solid rgba(246,185,59,0.32);border-radius: 14px;padding: 12px 14px;margin: 8px 0;">
-    <div style="font-size:13px;color:#A9B8D4;">覆盖情况</div>
+    <div style="font-size:13px;color:#6B7A90;">覆盖情况</div>
     <div style="display:flex;align-items:baseline;gap:8px;margin-top:3px;">
     <div style="font-size:24px;font-weight:800;color:#F6B93B;">{cur_active_teacher_cnt:,}</div>
-    <div style="font-size:13px;color:#A9B8D4;">/ {teacher_pool_30d:,}</div>
+    <div style="font-size:13px;color:#6B7A90;">/ {teacher_pool_30d:,}</div>
     </div>
-    <div style="font-size:12px;color:#7F8EA3;margin-top:2px;">近7天活跃老师数 / 近30天去重老师池</div>
+    <div style="font-size:12px;color:#6B7A90;margin-top:2px;">近7天活跃老师数 / 近30天去重老师池</div>
     </div>
     
     <div>
-    <div style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-    <div style="font-size:13px;color:#A9B8D4;">近7天活跃老师</div>
+    <div style="padding:8px 0;border-bottom:1px solid #E5EAF3;">
+    <div style="font-size:13px;color:#6B7A90;">近7天活跃老师</div>
     <div style="font-size:24px;font-weight:800;color:{COLOR_WARN};">{cur_active_teacher_cnt:,}</div>
     </div>
     
     <div style="padding:8px 0;">
-    <div style="font-size:13px;color:#A9B8D4;">上一周活跃老师</div>
+    <div style="font-size:13px;color:#6B7A90;">上一周活跃老师</div>
     <div style="font-size:24px;font-weight:800;color:{COLOR_PRIMARY};">{last_active_teacher_cnt:,}</div>
     </div>
     
@@ -1148,8 +1148,8 @@ overflow:auto;
 
         st.markdown(
     f"""
-    <div class="custom-analytic-card" style="margin-top:14px;background: rgba(255,255,255,0.03);border: 1px solid rgba(255,255,255,0.07);border-radius: 14px;padding: 12px 16px;color: #D7E3FF;font-size: 13px;line-height: 1.7;">
-    <b style="color:#EAF1FF;">结论：</b>{conclusion}
+    <div class="custom-analytic-card" style="margin-top:14px;background:#F8FBFF;border:1px solid #E5EAF3;border-radius:14px;padding:12px 16px;color:#425466;font-size:13px;line-height:1.7;">
+    <b style="color:#16324F;">结论：</b>{conclusion}
     </div>
     """,
     unsafe_allow_html=True

@@ -11,12 +11,12 @@ CHART_H_XL = 420
 # =========================
 # 主题色
 # =========================
-CARD_BG = "#1A2335"
-GRID_COLOR = "#25324A"
-TEXT_COLOR = "#EAF1FF"
-SUB_TEXT_COLOR = "#A9B8D4"
-BORDER_COLOR = "rgba(255,255,255,0.06)"
-HOVER_BG = "#1B2740"
+CARD_BG = "#FFFFFF"
+GRID_COLOR = "#E7EEF7"
+TEXT_COLOR = "#16324F"        # 深蓝色，白底可见
+SUB_TEXT_COLOR = "#6B7A90"    # 灰色
+BORDER_COLOR = "#E5EAF3"
+HOVER_BG = "#EEF4FB"
 
 COLOR_PRIMARY = "#3B5998"
 COLOR_SECOND = "#7BCFA6"
@@ -144,7 +144,7 @@ def inject_chart_css():
     }
 
     .chart-title {
-        color: #EAF1FF;
+        color: #16324F;
         font-size: 15px;
         font-weight: 700;
         line-height: 1.3;
@@ -154,7 +154,7 @@ def inject_chart_css():
     }
 
     .chart-subtitle {
-        color: #A9B8D4;
+        color: #6B7A90;
         font-size: 12px;
         line-height: 1.35;
         margin: -2px 0 8px 0;
@@ -164,14 +164,14 @@ def inject_chart_css():
 
     div[data-testid="stPlotlyChart"] {
         position: relative;
-        background: #1A2335;
-        border: 1px solid rgba(255,255,255,0.06);
+        background: #FFFFFF;
+        border: 1px solid #E5EAF3;
         border-radius: 16px;
         padding: 8px 10px 4px 10px;
         margin-bottom: 12px;
         overflow: hidden;
         transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
-        box-shadow: 0 10px 28px rgba(5, 10, 20, 0.16);
+        box-shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
         will-change: transform, box-shadow;
         transform-origin: center center;
         z-index: 1;
@@ -192,9 +192,9 @@ def inject_chart_css():
         background: linear-gradient(
             105deg,
             rgba(255,255,255,0) 0%,
-            rgba(255,255,255,0.03) 42%,
-            rgba(123, 207, 166, 0.18) 50%,
-            rgba(255,255,255,0.02) 58%,
+            rgba(80, 130, 190, 0.04) 42%,
+            rgba(123, 207, 166, 0.12) 50%,
+            rgba(80, 130, 190, 0.03) 58%,
             rgba(255,255,255,0) 100%
         );
         pointer-events: none;
@@ -206,7 +206,7 @@ def inject_chart_css():
     div[data-testid="stPlotlyChart"]:hover {
         transform: translateY(-4px);
         border-color: rgba(123, 207, 166, 0.22);
-        box-shadow: 0 18px 38px rgba(5, 10, 20, 0.30);
+        box-shadow: 0 18px 38px rgba(15, 23, 42, 0.14);
         z-index: 3;
     }
 
@@ -402,7 +402,7 @@ def inject_chart_css():
 
     .custom-analytic-card:hover {
         transform: translateY(-6px) scale(1.025);
-        box-shadow: 0 20px 42px rgba(15, 23, 42, 0.30);
+        box-shadow: 0 20px 42px rgba(15, 23, 42, 0.14);
         border-color: rgba(123, 207, 166, 0.18) !important;
         filter: brightness(1.04) saturate(1.04);
     }
@@ -428,17 +428,16 @@ def inject_chart_css():
     }
 
     .task-penetration-track {
-        flex: 1;
-        position: relative;
-        height: 28px;
-        background: rgba(255,255,255,0.06);
-        border-radius: 999px;
-        overflow: hidden;
-        transition: background 0.24s ease;
+        flex:1;
+        position:relative;
+        height:28px;
+        background:#EDF3F9;
+        border-radius:999px;
+        overflow:hidden;
     }
 
     .task-penetration-row:hover .task-penetration-track {
-        background: rgba(255,255,255,0.10);
+        background: #E3ECF6 !important;
     }
 
     .task-penetration-fill {
@@ -460,7 +459,7 @@ def inject_chart_css():
 
     .task-penetration-row:hover .task-penetration-fill {
         filter: brightness(1.08) saturate(1.08);
-        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.22);
+        box-shadow: 0 10px 20px rgba(15, 23, 42, 0.12);
     }
 
     .metric-summary-card {
@@ -481,7 +480,7 @@ def inject_chart_css():
 
     .metric-board-card:hover {
         transform: translateY(-10px) scale(1.06);
-        box-shadow: 0 24px 44px rgba(15, 23, 42, 0.34);
+        box-shadow: 0 24px 44px rgba(15, 23, 42, 0.16);
         border-color: rgba(123, 207, 166, 0.26) !important;
         filter: brightness(1.08) saturate(1.08);
     }
@@ -498,7 +497,7 @@ def inject_chart_css():
 
     .rank-board-card:hover {
         transform: translateY(-6px) scale(1.02);
-        box-shadow: 0 18px 36px rgba(15, 23, 42, 0.28);
+        box-shadow: 0 18px 36px rgba(15, 23, 42, 0.14);
         border-color: rgba(123, 207, 166, 0.18) !important;
         filter: brightness(1.04);
     }
@@ -511,7 +510,7 @@ def inject_chart_css():
 
     .rank-board-row:hover {
         transform: translateX(4px);
-        background-color: rgba(255,255,255,0.03);
+        background-color: #F5F9FD;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -553,13 +552,25 @@ def style_figure(
     )
 
     if legend_top:
+            fig.update_layout(
+                legend=dict(
+                    orientation="h",
+                    y=1.02,
+                    x=0,
+                    xanchor="left",
+                    yanchor="bottom",
+                    font=dict(size=11),
+                    bgcolor="rgba(0,0,0,0)"
+                )
+            )
+    else:
         fig.update_layout(
             legend=dict(
                 orientation="h",
-                y=1.02,
-                x=0,
-                xanchor="left",
-                yanchor="bottom",
+                y=-0.18,
+                x=0.5,
+                xanchor="center",
+                yanchor="top",
                 font=dict(size=11),
                 bgcolor="rgba(0,0,0,0)"
             )
@@ -656,7 +667,7 @@ def beautify_diverging_bar_chart(fig):
     fig.update_xaxes(
         showgrid=False,
         zeroline=True,
-        zerolinecolor="rgba(255,255,255,0.18)",
+            zerolinecolor="rgba(22, 50, 79, 0.16)",
         zerolinewidth=1.2,
         tickfont=dict(color=SUB_TEXT_COLOR, size=11),
         title_font=dict(color=TEXT_COLOR, size=12)
@@ -713,7 +724,7 @@ def beautify_scatter_chart(fig):
     fig.update_traces(
         marker=dict(
             size=11,
-            line=dict(width=1, color="rgba(255,255,255,0.18)")
+            line=dict(width=1, color="rgba(22, 50, 79, 0.14)")
         ),
         cliponaxis=False
     )
@@ -728,7 +739,7 @@ def beautify_pie_chart(fig):
         textposition="inside",
         textinfo="percent",
         marker=dict(
-            line=dict(color="#0B1220", width=2)
+            line=dict(color="#FFFFFF", width=2)
         )
     )
     return fig

@@ -101,7 +101,7 @@ def render_school_detail_page(
 }
 
 .task-penetration-row:hover .task-penetration-track {
-    background: rgba(255,255,255,0.10) !important;
+    background: #E3ECF6 !important;
 }
 
 .task-penetration-row:hover .task-penetration-fill {
@@ -113,7 +113,7 @@ def render_school_detail_page(
     flex:1;
     position:relative;
     height:28px;
-    background:rgba(255,255,255,0.06);
+    background:#EDF3F9;
     border-radius:999px;
     overflow:hidden;
     transition: background 0.24s ease;
@@ -468,7 +468,7 @@ def render_school_detail_page(
 {rank}
 </div>
 <div style="min-width:0;">
-<div style="font-size:14px;font-weight:600;color:white;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;">
+<div style="font-size:14px;font-weight:600;color:#16324F;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;">
 {row['老师姓名']}
 </div>
 <div style="font-size:10px;color:#8FA3BF;margin-top:2px;line-height:1.2;">
@@ -495,8 +495,8 @@ def render_school_detail_page(
 
             st.markdown(
                 f"""<div class="rank-board-card" style="
-background:rgba(255,255,255,0.03);
-border:1px solid rgba(255,255,255,0.08);
+background:#FFFFFF;
+border:1px solid #E5EAF3;
 border-radius:16px;
 padding:12px 16px;
 min-height:320px;
@@ -542,7 +542,7 @@ min-height:320px;
 
 <div style="flex:1;min-width:120px;padding:12px 16px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;">
 <div style="font-size:11px;color:#8FA3BF;margin-bottom:4px;">结论</div>
-<div style="font-size:12px;color:#EAF1FF;line-height:1.7;margin-top:2px;">
+<div style="font-size:12px;color:#16324F;line-height:1.7;margin-top:2px;">
 共 <b>{total_teachers}</b> 位老师，有效样本（任务≥{MIN_TASK}）<b>{len(teacher_valid)}</b> 位。建议关注参与率高但完成率低的老师，优化任务质量与学生跟进链路。
 </div>
 </div>
@@ -551,7 +551,6 @@ min-height:320px;
             )
 
     with col_right:
-        st.markdown("#### 参与率变化（按老师）Top/Bottom")
         st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
 
         teacher_cur_part = teacher_cur[teacher_cur["学校"] == selected_school][["老师姓名", "参与率"]].copy()
@@ -579,7 +578,7 @@ min-height:320px;
                 x=[max_val] * len(teacher_change_show),
                 y=teacher_change_show["老师姓名"],
                 orientation="h",
-                marker=dict(color="rgba(255,255,255,0.06)", line_width=0),
+                marker=dict(color="rgba(0,0,0,0.06)", line_width=0),
                 showlegend=False,
                 hoverinfo="skip"
             ))
@@ -587,7 +586,7 @@ min-height:320px;
                 x=[-max_val] * len(teacher_change_show),
                 y=teacher_change_show["老师姓名"],
                 orientation="h",
-                marker=dict(color="rgba(255,255,255,0.06)", line_width=0),
+                marker=dict(color="rgba(0,0,0,0.06)", line_width=0),
                 showlegend=False,
                 hoverinfo="skip"
             ))
@@ -618,7 +617,7 @@ min-height:320px;
                     range=[-max_val * 1.05, max_val * 1.05],
                     showgrid=False,
                     zeroline=True,
-                    zerolinecolor="rgba(255,255,255,0.18)",
+                    zerolinecolor="#D7E1EE",
                     zerolinewidth=1.2,
                     tickfont=dict(color=SUB_TEXT_COLOR, size=10),
                     showline=False
@@ -642,7 +641,6 @@ min-height:320px;
 
         st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
 
-        st.markdown("#### 参与后完成率变化（按老师）Top/Bottom")
         st.markdown("<div style='height:18px'></div>", unsafe_allow_html=True)
 
         teacher_cur_part = teacher_cur[teacher_cur["学校"] == selected_school][["老师姓名", "参与后完成率"]].copy()
@@ -709,7 +707,7 @@ min-height:320px;
                     range=[-max_val * 1.05, max_val * 1.05],
                     showgrid=False,
                     zeroline=True,
-                    zerolinecolor="rgba(255,255,255,0.18)",
+                    zerolinecolor="#D7E1EE",
                     zerolinewidth=1.2,
                     tickfont=dict(color=SUB_TEXT_COLOR, size=10),
                     showline=False
@@ -831,13 +829,13 @@ min-height:320px;
                     x=x_mid,
                     line_width=1.2,
                     line_dash="dash",
-                    line_color="rgba(255,255,255,0.24)"
+                    line_color="rgba(22, 50, 79, 0.30)"
                 )
                 fig_scatter.add_hline(
                     y=y_mid,
                     line_width=1.2,
                     line_dash="dash",
-                    line_color="rgba(255,255,255,0.24)"
+                    line_color="rgba(22, 50, 79, 0.30)"
                 )
 
                 y_max = max(102, filtered_df["参与率"].max() + 3)
@@ -878,10 +876,10 @@ min-height:320px;
 
 <div class="custom-analytic-card" style="
 padding:12px 14px;
-background:rgba(255,255,255,0.03);
-border:1px solid rgba(255,255,255,0.08);
+background:#F8FBFF;
+border:1px solid #E5EAF3;
 border-radius:12px;
-color:#EAF1FF;
+color:#16324F;
 font-size:13px;
 line-height:1.7;
 ">
@@ -896,10 +894,10 @@ line-height:1.7;
 
 <div class="custom-analytic-card" style="
 padding:12px 14px;
-background:linear-gradient(90deg, rgba(96,165,250,0.08), rgba(240,138,138,0.08));
+background:linear-gradient(90deg, rgba(96,165,250,0.06), rgba(52,211,153,0.06));border:1px solid #E5EAF3;
 border:1px solid rgba(255,255,255,0.08);
 border-radius:12px;
-color:#EAF1FF;
+color:#16324F;
 font-size:13px;
 line-height:1.75;
 ">
@@ -915,7 +913,7 @@ line-height:1.75;
 高效占比 <span style="color:#5AD8A6;font-weight:700;">{high_ratio:.0%}</span>，
 需跟进占比 <span style="color:#F08A8A;font-weight:700;">{follow_ratio:.0%}</span>
 </div>
-<div style="color:#A9B8D4;margin-top:4px;">
+<div style="color:#6B7A90;margin-top:4px;">
 建议优先关注需跟进人群，优化任务设计与完成链路。
 </div>
 </div>
@@ -992,7 +990,7 @@ line-height:1.75;
 <div style="display:flex;align-items:center;gap:10px;flex:1.8;">
 <div style="width:24px;height:24px;border-radius:6px;background:{badge_bg};color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">{rank}</div>
 <div>
-<div style="font-size:13px;font-weight:600;color:white;line-height:1.2;">{row['科目']}</div>
+<div style="font-size:13px;font-weight:600;color:#16324F;line-height:1.2;">{row['科目']}</div>
 <div style="font-size:10px;color:#8FA3BF;margin-top:2px;line-height:1.2;">
     任务{task_cnt:.0f}｜接收{recv_cnt:.0f}
 </div>
@@ -1012,7 +1010,7 @@ line-height:1.75;
 """
 
                 full_html_school = f"""
-<div class="rank-board-card" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:10px 14px;min-height:260px;overflow:auto;">
+<div class="rank-board-card" style="background:#F8FBFF;border:1px solid #E5EAF3;border-radius:14px;padding:10px 14px;min-height:260px;overflow:auto;">
     {rows_html_school}
 </div>
 """
@@ -1034,19 +1032,19 @@ line-height:1.75;
                 st.markdown(f"""
 <div style="display:flex;flex-direction:column;gap:12px;">
 
-<div class="custom-analytic-card" style="padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:#EAF1FF;font-size:13px;line-height:1.7;">
+<div class="custom-analytic-card" style="padding:12px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:#16324F;font-size:13px;line-height:1.7;">
 <div style="font-weight:700;margin-bottom:6px;">当前校区：<span style="color:#60A5FA;">{selected_school}</span></div>
 <div>共覆盖 <b>{len(school_summary)}</b> 个科目。</div>
 <div>平均参与率 <span style="color:#60A5FA;font-weight:700;">{avg_part:.1f}%</span></div>
 <div>平均参与后完成率 <span style="color:#34D399;font-weight:700;">{avg_finish:.1f}%</span></div>
 </div>
 
-<div class="custom-analytic-card" style="padding:12px 14px;background:linear-gradient(90deg, rgba(96,165,250,0.08), rgba(52,211,153,0.08));border:1px solid rgba(255,255,255,0.08);border-radius:12px;color:#EAF1FF;font-size:13px;line-height:1.75;">
+<div class="custom-analytic-card" style="padding:12px 14px;background:linear-gradient(90deg, rgba(96,165,250,0.06), rgba(52,211,153,0.06));border:1px solid #E5EAF3;border-radius:12px;color:#16324F;font-size:13px;line-height:1.75;">
 <div style="font-weight:700;margin-bottom:6px;">关键观察</div>
 <div>当前综合排序领先科目：<b>{top_subject}</b></div>
-<div>参与率最高科目：<span style="color:#60A5FA;font-weight:700;">{top_part}</span></div>
-<div>参与后完成率最高科目：<span style="color:#34D399;font-weight:700;">{top_finish}</span></div>
-<div style="color:#A9B8D4;margin-top:4px;">可优先复用高表现科目的任务设计方式，再针对低表现科目优化触达与完成链路。</div>
+<div>参与率最高科目：<span style="color:#3B82F6;font-weight:700;">{top_part}</span></div>
+<div>参与后完成率最高科目：<span style="color:#059669;font-weight:700;">{top_finish}</span></div>
+<div style="color:#6B7A90;margin-top:4px;">可优先复用高表现科目的任务设计方式，再针对低表现科目优化触达与完成链路。</div>
 </div>
 </div>
 """, unsafe_allow_html=True)
@@ -1159,7 +1157,7 @@ line-height:1.75;
                 long_tail_ratio = pie_df["占比"].iloc[3:].sum() if len(pie_df) > 3 else 0
 
                 st.markdown(f"""
-<div class="custom-analytic-card task-type-summary-card" style="margin:6px 0 14px 0;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;font-size:13px;line-height:1.6;color:#EAF1FF;">
+<div class="custom-analytic-card task-type-summary-card" style="margin:6px 0 14px 0;padding:10px 14px;background:#F8FBFF;border:1px solid #E5EAF3;border-radius:12px;font-size:13px;line-height:1.6;color:#16324F;">
 当前校区任务结构以 <b style="color:#7BCFA6;">{top_text}</b> 为主导，
 Top3 合计占比约 <b>{top3['占比'].sum():.1f}%</b>；
 其余类型占比约 <b>{long_tail_ratio:.1f}%</b>，
@@ -1193,7 +1191,7 @@ Top3 合计占比约 <b>{top3['占比'].sum():.1f}%</b>；
                 fig_pie.update_traces(
                     textposition="inside",
                     textinfo="percent",
-                    marker=dict(line=dict(color="#0B1220", width=2))
+                    marker=dict(line=dict(color="#FFFFFF", width=2))
                 )
                 render_chart_card(fig_pie, title="任务类型占比")
 
@@ -1216,7 +1214,7 @@ Top3 合计占比约 <b>{top3['占比'].sum():.1f}%</b>；
 
                         rows_html += f"""
 <div class="task-penetration-row">
-<div style="width:88px;text-align:right;font-size:13px;color:#EAF1FF;flex-shrink:0;">{row['任务类型']}</div>
+<div style="width:88px;text-align:right;font-size:13px;color:#16324F;flex-shrink:0;">{row['任务类型']}</div>
 <div class="task-penetration-track">
 <div class="task-penetration-fill" style="width:{bar_width:.1f}%;background:{color};animation-delay:{0.08 + i * 0.05:.2f}s;">
 <span style="font-size:12px;font-weight:700;color:white;white-space:nowrap;">{val:.1f}%</span>
@@ -1227,8 +1225,8 @@ Top3 合计占比约 <b>{top3['占比'].sum():.1f}%</b>；
 """
 
                     st.markdown(f"""
-<div class="custom-analytic-card task-penetration-card" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px 20px;max-height:440px;overflow-y:auto;">
-<div style="font-size:14px;font-weight:700;color:#EAF1FF;margin-bottom:12px;">任务渗透率（近7天老师 / 近30天老师池）</div>
+<div class="custom-analytic-card task-penetration-card" style="background:#FFFFFF;border:1px solid #E5EAF3;border-radius:16px;padding:16px 20px;max-height:440px;overflow-y:auto;">
+<div style="font-size:14px;font-weight:700;color:#16324F;margin-bottom:12px;">任务渗透率（近7天老师 / 近30天老师池）</div>
 {rows_html}
 </div>
 """, unsafe_allow_html=True)

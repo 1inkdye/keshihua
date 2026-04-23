@@ -1,5 +1,4 @@
 import streamlit as st
-from altair.utils.schemapi import DEBUG_MODE
 import pandas as pd
 from io import BytesIO
 from utils.charts import inject_chart_css
@@ -32,14 +31,15 @@ html, body, [class*="css"] {
 }
 
 .stApp {
-    background: #131C2E;
+    background: #F7F9FC;
 }
+
 .chart-card {
-    background: #292C43;
-    border: 1px solid rgba(123, 207, 166, 0.16);
+    background: #FFFFFF;
+    border: 1px solid rgba(59, 89, 152, 0.12);
     border-radius: 20px;
     padding: 14px 16px 8px 16px;
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.16);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
     margin-bottom: 14px;
 }
 
@@ -47,41 +47,33 @@ html, body, [class*="css"] {
     margin: 8px 0 18px 0;
     padding: 18px 24px 20px 24px;
     border-radius: 20px;
-    border: 1px solid rgba(59, 89, 152, 0.30);
-    background: #1A2335;
-    box-shadow: 0 16px 34px rgba(8, 12, 28, 0.24);
-}
-
-.ai-summary-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 12px;
+    border: 1px solid rgba(59, 89, 152, 0.15);
+    background: #FFFFFF;
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.06);
 }
 
 .ai-summary-title {
-    color: #F8FAFC;
+    color: #16324F;
     font-size: 16px;
     font-weight: 700;
     line-height: 1.3;
 }
 
 .ai-summary-toggle {
-    color: #A9B8D4;
+    color: #6B7A90;
     font-size: 12px;
     line-height: 1;
 }
 
 .ai-summary-headline {
-    color: #DCE6FF;
+    color: #16324F;
     font-size: 13px;
     line-height: 1.7;
     margin-bottom: 14px;
     padding: 10px 12px;
     border-radius: 12px;
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: rgba(0,0,0,0.02);
+    border: 1px solid rgba(0,0,0,0.06);
 }
 
 .ai-summary-grid {
@@ -91,40 +83,30 @@ html, body, [class*="css"] {
     margin-bottom: 16px;
 }
 
-.ai-summary-col {
-    min-width: 0;
-}
-
-.ai-summary-col-title {
-    font-size: 14px;
-    font-weight: 700;
-    margin-bottom: 10px;
-}
-
-.ai-summary-col-title-good {
-    color: #7BCFA6;
-}
-
-.ai-summary-col-title-warn {
-    color: #FF9900;
-}
-
 .ai-summary-col ul {
     list-style: disc;
     margin: 0;
     padding-left: 18px;
-    color: #D7E3FF;
+    color: #16324F;
     line-height: 1.7;
     font-size: 13px;
 }
 
 .ai-summary-col li {
     padding: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(0,0,0,0.06);
 }
 
 .ai-summary-col li:last-child {
     border-bottom: none;
+}
+
+.ai-summary-col-title-good {
+    color: #2D9E6B;
+}
+
+.ai-summary-col-title-warn {
+    color: #D97706;
 }
 
 @media (max-width: 900px) {
@@ -153,9 +135,9 @@ header[data-testid="stHeader"] {
     max-width: 100% !important;
 }
 
-/* ========== 标题（不动你原来的层级） ========== */
+/* ========== 标题 ========== */
 h1, h2, h3 {
-    color: #EAF1FF !important;
+    color: #16324F !important;
     font-weight: 700 !important;
     line-height: 1.25 !important;
     margin-bottom: 0.5rem !important;
@@ -164,21 +146,20 @@ h1, h2, h3 {
 h1 { font-size: 24px !important; }
 h2 { font-size: 20px !important; }
 h3 { font-size: 17px !important; }
-h4 { font-size: 15px !important; color: #EAF1FF !important; }
+h4 { font-size: 15px !important; color: #16324F !important; }
 
-/* ========== ⚠️ 关键修复：不再污染 div/span ========== */
 p {
-    color: #D7E3FF;
+    color: #16324F;
     font-size: 13px !important;
 }
 
 label {
-    color: #D7E3FF;
+    color: #16324F;
     font-size: 13px !important;
 }
 
 [data-testid="stCaptionContainer"] {
-    color: #8FA3BF !important;
+    color: #6B7A90 !important;
     font-size: 12px !important;
 }
 
@@ -187,18 +168,17 @@ label {
     position: sticky;
     top: 0;
     z-index: 999;
-    background: rgba(6, 21, 45, 0.92);
+    background: rgba(247, 249, 252, 0.95);
     backdrop-filter: blur(8px);
-    border-bottom: 1px solid rgba(255,255,255,0.06);
+    border-bottom: 1px solid rgba(0,0,0,0.08);
     padding: 8px 0 12px 0;
     margin: 0 0 0.8rem 0;
 }
 
-/* 🔥 只放大这个：主标题 */
 .top-nav-title {
     font-size: 24px !important;
     font-weight: 600 !important;
-    color: #EAF1FF !important;
+    color: #16324F !important;
     line-height: 1.1 !important;
     margin: 0 !important;
 }
@@ -210,114 +190,95 @@ div[data-testid="stButton"] > button {
     border-radius: 10px !important;
     font-size: 12px !important;
     font-weight: 600 !important;
-    border: 1px solid rgba(255,255,255,0.10) !important;
-    background: rgba(255,255,255,0.02) !important;
-    color: #EAF1FF !important;
+    border: 1px solid rgba(0,0,0,0.10) !important;
+    background: rgba(0,0,0,0.02) !important;
+    color: #16324F !important;
 }
 
 div[data-testid="stButton"] > button:hover {
-    border: 1px solid rgba(120,168,224,0.35) !important;
-    background: rgba(255,255,255,0.05) !important;
+    border: 1px solid rgba(59, 89, 152, 0.35) !important;
+    background: rgba(59, 89, 152, 0.05) !important;
 }
 
 div[data-testid="stButton"] > button[kind="primary"] {
-    background: rgba(76,120,168,0.30) !important;
-    border: 1px solid rgba(120,168,224,0.55) !important;
+    background: rgba(59, 89, 152, 0.12) !important;
+    border: 1px solid rgba(59, 89, 152, 0.40) !important;
+    color: #16324F !important;
 }
 
-/* ===== selectbox 外框 ===== */
+/* ===== selectbox ===== */
 div[data-baseweb="select"] > div {
     min-height: 38px !important;
     height: 38px !important;
     border-radius: 10px !important;
-    background: rgba(255,255,255,0.03) !important;
-    border: 1px solid rgba(255,255,255,0.08) !important;
-}
-div[data-baseweb="select"] div[role="combobox"],
-div[data-baseweb="select"] div[role="combobox"] * {
-    font-size: 12px !important;
-    color: #EAF1FF !important;
+    background: #FFFFFF !important;
+    border: 1px solid rgba(0,0,0,0.10) !important;
 }
 
-/* ===== selectbox 当前显示值：强制命中所有内层文字 ===== */
 div[data-baseweb="select"] * {
     font-size: 12px !important;
 }
 
-/* 当前选中的学校名 */
 div[data-baseweb="select"] div[role="combobox"] {
     font-size: 12px !important;
-    color: #EAF1FF !important;
+    color: #16324F !important;
     line-height: 1.2 !important;
 }
 
-/* combobox 里面的文字容器 */
-div[data-baseweb="select"] div[role="combobox"] > div {
-    font-size: 12px !important;
-    color: #EAF1FF !important;
-}
-
-/* 输入状态 */
 div[data-baseweb="select"] input {
     font-size: 12px !important;
-    color: #EAF1FF !important;
-    line-height: 1.2 !important;
+    color: #16324F !important;
 }
 
-/* placeholder */
 div[data-baseweb="select"] input::placeholder {
     font-size: 12px !important;
-    color: #8FA3BF !important;
+    color: #6B7A90 !important;
 }
 
-/* 下拉菜单里的选项 */
 div[role="listbox"] * {
     font-size: 12px !important;
 }
 
-/* 下拉箭头 */
 div[data-baseweb="select"] svg {
     width: 18px !important;
     height: 18px !important;
 }
 
-/* ========== 🔥 KPI（只放大数字，不影响其他文字） ========== */
+/* ========== KPI 卡片 ========== */
 div[data-testid="stMetric"] {
-    padding: 4px 0 !important;
-    border: 1px solid rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(0,0,0,0.06) !important;
     border-radius: 14px !important;
-    background: rgba(255,255,255,0.02) !important;
+    background: #FFFFFF !important;
     padding: 14px 16px !important;
     transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
                 box-shadow 0.24s ease,
-                border-color 0.24s ease,
-                background 0.24s ease !important;
+                border-color 0.24s ease !important;
 }
 
 div[data-testid="stMetric"]:hover {
     transform: translateY(-4px);
-    border-color: rgba(123, 207, 166, 0.20) !important;
-    background: rgba(255,255,255,0.04) !important;
-    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.24) !important;
+    border-color: rgba(59, 89, 152, 0.20) !important;
+    background: #FFFFFF !important;
+    box-shadow: 0 14px 30px rgba(15, 23, 42, 0.08) !important;
 }
 
 div[data-testid="stMetric"] label[data-testid="stMetricLabel"] {
     font-size: 12px !important;
-    color: #8FA3BF !important;
+    color: #6B7A90 !important;
 }
+
 div[data-testid="stMetric"] div[data-testid="stMetricValue"],
 div[data-testid="stMetric"] div[data-testid="stMetricValue"] * {
     font-size: 26px !important;
     font-weight: 200 !important;
-    color: #F8FAFC !important;
+    color: #16324F !important;
     line-height: 1.1 !important;
-    letter-spacing: 0.3px !important;
 }
 
 /* ========== 分割线 ========== */
 hr {
     border: none !important;
-    border-top: 1px solid rgba(255,255,255,0.08) !important;
+    border-top: 1px solid rgba(0,0,0,0.08) !important;
     margin: 1rem 0 !important;
 }
 
@@ -329,7 +290,7 @@ hr {
 
 /* ========== 表格 ========== */
 [data-testid="stDataFrame"] {
-    border: 1px solid rgba(255,255,255,0.06) !important;
+    border: 1px solid rgba(0,0,0,0.06) !important;
     border-radius: 12px !important;
 }
 
@@ -449,6 +410,7 @@ def file_to_bytes(uploaded_file):
     }
 
 
+@st.cache_data(show_spinner=False)
 def load_table_from_bytes(file_dict):
     if file_dict is None:
         return None
@@ -501,7 +463,17 @@ def load_all_data(
         df_task_all_raw = preprocess_task(load_table_from_bytes(task_file_bytes))
 
     if student_file_bytes is not None:
-        df_student_all = preprocess_student(load_table_from_bytes(student_file_bytes))
+        STUDENT_COLS = [
+            "发布时间", "完成时间",
+            "老师邮箱", "老师姓名", "任务类型", "任务名称", "主任务名称",
+            "学生姓名", "学员号", "学员任务状态",
+            "正确率", "做题数", "学校", "学校名称", "校区", "校区名称",
+            "老师评语", "老师评星"
+        ]
+        raw_student = load_table_from_bytes(student_file_bytes)
+        # 只保留实际存在的列
+        keep_cols = [c for c in STUDENT_COLS if c in raw_student.columns]
+        df_student_all = preprocess_student(raw_student[keep_cols])
 
     # ================= 老师维表 + 任务挂维 =================
     if not df_teacher_all.empty:
@@ -730,20 +702,7 @@ def render_api_mode():
 # ================= 输入页 =================
 def render_input_page():
     st.title("📊 作业任务数据看板")
-    st.caption("支持通过上传文件或接口拉取两种方式获取数据，并自动生成分析结果。")
-
-    st.markdown("## 数据获取方式")
-    data_source = st.radio(
-        "请选择数据来源",
-        ["上传文件", "接口拉取"],
-        horizontal=True,
-        key="data_source"
-    )
-
-    if data_source == "上传文件":
-        render_upload_mode()
-    else:
-        render_api_mode()
+    render_upload_mode()
 
 # ================= 看板页 =================
 def render_dashboard():

@@ -50,9 +50,9 @@ def _safe_pct(numerator, denominator):
 def _deep_card(title, subtitle, body_html, card_bg, height=None):
     """统一渲染深度分析卡片，固定高度，内容区滚动。"""
     h = height or CARD_HEIGHT
-    s_outer = f"background:{card_bg};border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px 18px;height:{h}px;box-sizing:border-box;display:flex;flex-direction:column;overflow:hidden;"
-    s_title = "font-size:15px;font-weight:700;color:#EAF1FF;margin-bottom:6px;flex-shrink:0;"
-    s_sub = "font-size:11px;color:#8FA3BF;margin-bottom:12px;flex-shrink:0;"
+    s_outer = f"background:{card_bg};border:1px solid #E5EAF3;border-radius:16px;padding:16px 18px;height:{h}px;box-sizing:border-box;display:flex;flex-direction:column;overflow:hidden;"
+    s_title = "font-size:15px;font-weight:700;color:#16324F;margin-bottom:6px;flex-shrink:0;"
+    s_sub = "font-size:11px;color:#6B7A90;margin-bottom:12px;flex-shrink:0;"
     s_body = "flex:1;min-height:0;overflow-y:auto;padding-right:4px;"
     return (
         f'<div style="{s_outer}">'
@@ -354,8 +354,8 @@ def render_overview_deep_analysis_panel_v2(
         rows = []
         for _, row in df.iterrows():
             rows.append(f"""
-<div style="display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:16px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
-  <div style="min-width:0;color:#EAF1FF;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{row[name_col]}</div>
+<div style="display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:16px;align-items:center;padding:10px 0;border-bottom:1px solid #E5EAF3;">
+  <div style="min-width:0;color:#16324F;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{row[name_col]}</div>
   <div style="text-align:right;">
     <div style="color:{score_color};font-size:13px;font-weight:700;">{row[score_col]:.1f}{suffix}</div>
     <div style="color:#8FA3BF;font-size:11px;line-height:1.5;">{meta_builder(row)}</div>
@@ -384,10 +384,10 @@ def render_overview_deep_analysis_panel_v2(
             progress_rows.append(f"""
 <div style="padding-bottom:14px;">
   <div style="display:grid;grid-template-columns:minmax(0,1fr) 72px;gap:14px;align-items:center;">
-    <div style="min-width:0;color:#EAF1FF;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{row['任务类型']}</div>
+    <div style="min-width:0;color:#16324F;font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{row['任务类型']}</div>
     <div style="text-align:right;color:{COLOR_SECOND};font-size:13px;font-weight:700;">{row['健康度']:.1f}%</div>
   </div>
-  <div style="height:8px;background:rgba(255,255,255,0.06);border-radius:999px;overflow:hidden;margin:8px 0 5px 0;">
+  <div style="height:8px;background:#E9EFF6;border-radius:999px;overflow:hidden;margin:8px 0 5px 0;">
     <div style="width:{max(min(row['健康度'], 100), 0):.1f}%;height:100%;background:{COLOR_SECOND};"></div>
   </div>
   <div style="display:flex;justify-content:space-between;gap:10px;color:#8FA3BF;font-size:11px;line-height:1.5;">
@@ -485,9 +485,9 @@ def render_overview_deep_analysis_panel_v2(
                     name = row["老师姓名"] if "老师姓名" in row and pd.notna(row["老师姓名"]) else "未知老师"
                     rows.append(f"""
 <div title="老师：{name}｜邮箱：{email}｜上周任务数：{int(row['发布任务总数'])}"
-     style="display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:16px;align-items:center;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">
+     style="display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:16px;align-items:center;padding:10px 0;border-bottom:1px solid #E5EAF3;">
   <div style="min-width:0;">
-    <div style="color:#EAF1FF;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{school} · {subject}</div>
+    <div style="color:#16324F;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{school} · {subject}</div>
     <div style="color:#8FA3BF;font-size:11px;line-height:1.5;">{name}</div>
   </div>
   <div style="text-align:right;">
@@ -519,11 +519,11 @@ def render_overview_deep_analysis_panel_v2(
     )
 
     def _action_row(icon, label, text, border=True):
-        border_style = "border-bottom:1px solid rgba(255,255,255,0.06);" if border else ""
+        border_style = "border-bottom:1px solid #E5EAF3;" if border else ""
         return (
             f'<div style="padding:10px 0;{border_style}">'
-            f'<div style="color:#EAF1FF;font-size:13px;font-weight:600;margin-bottom:4px;">{icon} {label}</div>'
-            f'<div style="color:#D7E3FF;font-size:12px;line-height:1.7;">{text}</div>'
+            f'<div style="color:#16324F;font-size:13px;font-weight:600;margin-bottom:4px;">{icon} {label}</div>'
+            f'<div style="color:#425466;font-size:12px;line-height:1.7;">{text}</div>'
             f'</div>'
         )
 
@@ -542,7 +542,7 @@ def render_overview_deep_analysis_panel_v2(
     ])
 
     _ds = (
-        f'<div style="background:{card_bg};border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px 18px;margin:10px 0 14px 0;color:#D7E3FF;">'
+        f'<div style="background:{card_bg};border:1px solid #E5EAF3;border-radius:16px;padding:14px 18px;margin:10px 0 14px 0;color:#425466;">'
         f'<div style="font-size:14px;font-weight:700;color:#60A5FA;margin-bottom:10px;">🔎 深度分析</div>'
         f'<ul style="margin:0;padding-left:18px;line-height:1.8;font-size:13px;">{deep_summary_html}</ul>'
         f'</div>'
@@ -913,6 +913,6 @@ def render_overview(df_school_cur, df_school_last, df_teacher_cur, df_teacher_la
             else:
                 conclusion = "近7天与近30天整体转化水平基本一致，近期表现相对稳定。"
 
-            st.markdown(f'''<div style="margin-top:8px;background:#1A2335;border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:12px 14px;color:#D7E3FF;font-size:13px;line-height:1.6;">
-<b style="color:#EAF1FF;"></b>{conclusion}
+            st.markdown(f'''<div style="margin-top:8px;background:#F8FBFF;border:1px solid #E5EAF3;border-radius:14px;padding:12px 14px;color:#425466;font-size:13px;line-height:1.6;">
+<b style="color:#16324F;"></b>{conclusion}
 </div>''', unsafe_allow_html=True)

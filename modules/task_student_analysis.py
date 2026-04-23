@@ -1,4 +1,4 @@
-import pandas as pd
+﻿import pandas as pd
 import streamlit as st
 import plotly.express as px
 import html
@@ -172,22 +172,22 @@ def render_task_type_metric_board(
     change_color = "#4ADE80" if str(change_text).startswith("+") else "#F87171"
 
     summary_html = f"""
-<div class="custom-analytic-card metric-summary-card" style="background:linear-gradient(90deg, rgba(43,73,132,0.30) 0%, rgba(72,64,140,0.25) 100%);border:1px solid rgba(90,120,200,0.20);border-radius:12px;padding:10px 16px;margin-bottom:12px;">
+<div class="custom-analytic-card metric-summary-card" style="background:linear-gradient(90deg, rgba(226,236,248,0.90) 0%, rgba(240,245,252,0.95) 100%);border:1px solid #D6E2F0;border-radius:12px;padding:10px 16px;margin-bottom:12px;">
 <div style="display:flex;justify-content:center;align-items:center;gap:28px;">
 <div style="text-align:center;">
 <div style="font-size:11px;color:#8FA3BF;font-weight:600;">{left_label}</div>
-<div style="font-size:15px;color:white;font-weight:800;line-height:1.3;">{left_value}</div>
+<div style="font-size:15px;color:#16324F;font-weight:800;line-height:1.3;">{left_value}</div>
 </div>
 
 <div style="display:flex;align-items:center;gap:10px;">
 <div style="font-size:12px;color:#8FA3BF;">→</div>
-<div style="font-size:11px;color:{change_color};background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);padding:2px 8px;border-radius:999px;font-weight:700;">
+<div style="font-size:11px;color:{change_color};background:#FFFFFF;border:1px solid #D7E1EE;padding:2px 8px;border-radius:999px;font-weight:700;">
 {change_text}
 </div>
 </div>
 
 <div style="text-align:center;"><div style="font-size:11px;color:#8FA3BF;font-weight:600;">{right_label}</div>
-<div style="font-size:18px;color:white;font-weight:800;line-height:1.3;">{right_value}</div>
+<div style="font-size:18px;color:#16324F;font-weight:800;line-height:1.3;">{right_value}</div>
 </div>
 </div>
 </div>
@@ -207,37 +207,37 @@ def render_task_type_metric_board(
     def get_card_style(change_val):
         # 默认蓝色卡
         style = {
-            "bg": "linear-gradient(180deg, rgba(42,66,118,0.75) 0%, rgba(49,64,103,0.60) 100%)",
-            "border": "rgba(59,130,246,0.28)",
+            "bg": "linear-gradient(180deg, #F8FBFF 0%, #EEF4FB 100%)",
+            "border": "#D7E1EE",
             "title": "#60A5FA",
-            "value": "#F8FAFC",
-            "change": "#A9B8D4",
+            "value": "#16324F",
+            "change": "#6B7A90",
         }
 
         if pd.isna(change_val):
             return style
         elif change_val >= 20:
             return {
-                "bg": "linear-gradient(180deg, rgba(79,41,52,0.78) 0%, rgba(69,48,68,0.62) 100%)",
-                "border": "rgba(239,68,68,0.35)",
+                "bg": "linear-gradient(180deg, #FFF5F2 0%, #FCE9E3 100%)",
+                "border": "#F0C7B8",
                 "title": "#F97316",
-                "value": "#F8FAFC",
+                "value": "#16324F",
                 "change": "#4ADE80",
             }
         elif change_val > 0:
             return {
-                "bg": "linear-gradient(180deg, rgba(42,66,118,0.78) 0%, rgba(49,64,103,0.62) 100%)",
-                "border": "rgba(59,130,246,0.35)",
+                "bg": "linear-gradient(180deg, #F8FBFF 0%, #EAF3FF 100%)",
+                "border": "#C9DCF3",
                 "title": "#60A5FA",
-                "value": "#F8FAFC",
+                "value": "#16324F",
                 "change": "#4ADE80",
             }
         else:
             return {
-                "bg": "linear-gradient(180deg, rgba(63,69,95,0.76) 0%, rgba(55,61,87,0.60) 100%)",
-                "border": "rgba(148,163,184,0.14)",
+                "bg": "linear-gradient(180deg, #F7F9FC 0%, #EDF2F7 100%)",
+                "border": "#D8E0EA",
                 "title": "#93C5FD",
-                "value": "#F8FAFC",
+                "value": "#16324F",
                 "change": "#F87171",
             }
 
@@ -283,7 +283,7 @@ def render_task_type_metric_board(
             f"""
 <div style="margin:12px 0 8px 0;display:flex;align-items:center;gap:6px;">
   <span style="width:8px;height:8px;border-radius:2px;background:{marker_color};display:inline-block;"></span>
-  <span style="color:#D7E3FF;font-size:13px;font-weight:700;">{html.escape(str(group_name))}</span>
+  <span style="color:#16324F;font-size:13px;font-weight:700;">{html.escape(str(group_name))}</span>
 </div>
 <div style="display:grid;grid-template-columns:repeat({cols_per_row}, minmax(0, 1fr));gap:10px 12px;">
   {''.join(cards_html)}
@@ -397,7 +397,7 @@ def render_top_rank_card(title, items):
     for i, (name, value_text, sub_text) in enumerate(items):
         rank = i + 1
         badge_bg = rank_colors[i] if i < 3 else "#374151"
-        divider = "" if i == len(items) - 1 else "border-bottom: 1px solid rgba(255,255,255,0.07);"
+        divider = "" if i == len(items) - 1 else "border-bottom: 1px solid #E5EAF3;"
 
         rows_html += f"""
     <div class="rank-board-row" style="display:flex;align-items:center;padding:10px 10px;{divider}">
@@ -406,9 +406,9 @@ def render_top_rank_card(title, items):
     <div style="width:22px;height:22px;border-radius:6px;background:{badge_bg};color:white;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;">{rank}
     </div>
     <div style="min-width:0;">
-    <div style="font-size:13px;font-weight:600;color:white;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{name}
+    <div style="font-size:13px;font-weight:600;color:#16324F;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{name}
     </div>
-    <div style="font-size:9px;color:#8FA3BF;margin-top:1px;">{sub_text}
+    <div style="font-size:9px;color:#6B7A90;margin-top:1px;">{sub_text}
     </div>
     </div>
     </div>
@@ -421,7 +421,7 @@ def render_top_rank_card(title, items):
     """
 
     full_html = f"""
-    <div class="rank-board-card" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:10px 14px;height:295px;overflow:auto;">
+    <div class="rank-board-card" style="background:#FFFFFF;border:1px solid #E5EAF3;border-radius:14px;padding:10px 14px;height:267px;overflow:auto;">
     {rows_html}
     </div>
     """
@@ -611,7 +611,7 @@ def render_task_student_analysis(
         ">
     """, unsafe_allow_html=True)
 
-    st.markdown("### 📦 任务层分析")
+    st.markdown("### 📦任务层分析")
 
     top_left, top_right = st.columns([1, 1], gap="large")
     TASK_COLORS = [
@@ -635,7 +635,7 @@ def render_task_student_analysis(
         long_tail_ratio = pie_df["占比"].iloc[3:].sum()
 
         st.markdown(f"""
-<div style="margin:6px 0 14px 0;padding:10px 14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;font-size:13px;line-height:1.6;color:#EAF1FF;">
+<div style="margin:6px 0 14px 0;padding:10px 14px;background:#F8FBFF;border:1px solid #E5EAF3;border-radius:12px;font-size:13px;line-height:1.6;color:#16324F;">
 当前任务结构以 <b style="color:#7BCFA6;">{top_text}</b> 为主导，
 合计占比约 <b>{top3['占比'].sum():.1f}%</b>；
 其余类型占比约 <b>{long_tail_ratio:.1f}%</b>，
@@ -657,7 +657,18 @@ def render_task_student_analysis(
             color_discrete_map=task_color_map
         )
         fig_pie = fix_pie(fig_pie)
-        show_chart(fig_pie, chart_type="pie", title="任务类型占比（Top12）")
+        fig_pie.update_layout(
+            title=dict(
+                text="任务类型占比（Top12）",
+                font=dict(size=14, color="#16324F"),
+                x=0.01,
+                xanchor="left",
+                y=0.97,
+                yanchor="top"
+            ),
+            margin=dict(l=12, r=12, t=50, b=34)
+        )
+        show_chart(fig_pie, chart_type="pie")
 
     with top_right:
         rank_tabs = st.tabs(["任务量最多", "参与率最高", "完成率最高"])
@@ -731,7 +742,7 @@ def render_task_student_analysis(
 
                 rows_html += f"""
 <div class="task-penetration-row">
-<div style="width:80px;text-align:right;font-size:13px;color:#EAF1FF;flex-shrink:0;">{row['任务类型']}</div>
+<div style="width:80px;text-align:right;font-size:13px;color:#16324F;flex-shrink:0;">{row['任务类型']}</div>
 <div class="task-penetration-track">
 <div class="task-penetration-fill" style="width:{bar_width:.1f}%;background:{color};animation-delay:{0.08 + i * 0.05:.2f}s;">
   <span style="font-size:12px;font-weight:700;color:white;white-space:nowrap;">{val:.1f}%</span>
@@ -741,8 +752,8 @@ def render_task_student_analysis(
 """
 
             st.markdown(f"""
-<div class="custom-analytic-card task-penetration-card" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px 20px;max-height:380px;overflow-y:auto;">
-<div style="font-size:14px;font-weight:700;color:#EAF1FF;margin-bottom:12px;">学生覆盖率</div>
+<div class="custom-analytic-card task-penetration-card" style="background:#FFFFFF;border:1px solid #E5EAF3;border-radius:16px;padding:16px 20px;max-height:380px;overflow-y:auto;">
+<div style="font-size:14px;font-weight:700;color:#16324F;margin-bottom:12px;">学生覆盖率</div>
 {rows_html}
 </div>
 """, unsafe_allow_html=True)
@@ -765,7 +776,7 @@ def render_task_student_analysis(
 
                 rows_html += f"""
 <div class="task-penetration-row">
-<div style="width:80px;text-align:right;font-size:13px;color:#EAF1FF;flex-shrink:0;">{row['任务类型']}</div>
+<div style="width:80px;text-align:right;font-size:13px;color:#16324F;flex-shrink:0;">{row['任务类型']}</div>
 <div class="task-penetration-track">
 <div class="task-penetration-fill" style="width:{bar_width:.1f}%;background:{color};animation-delay:{0.08 + i * 0.05:.2f}s;">
 <span style="font-size:12px;font-weight:700;color:white;white-space:nowrap;">{val:.1f}%</span>
@@ -776,8 +787,8 @@ def render_task_student_analysis(
 """
 
             st.markdown(f"""
-<div class="custom-analytic-card task-penetration-card" style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px 20px;max-height:380px;overflow-y:auto;">
-<div style="font-size:14px;font-weight:700;color:#EAF1FF;margin-bottom:12px;">任务渗透率（近7天老师/近30天老师池）</div>
+<div class="custom-analytic-card task-penetration-card" style="background:#FFFFFF;border:1px solid #E5EAF3;border-radius:16px;padding:16px 20px;max-height:380px;overflow-y:auto;">
+<div style="font-size:14px;font-weight:700;color:#16324F;margin-bottom:12px;">任务渗透率（近7天老师/近30天老师池）</div>
 {rows_html}
 </div>
 """, unsafe_allow_html=True)
@@ -845,7 +856,7 @@ def render_task_student_analysis(
                     lambda x: f"{int(x)}" if x >= drop_summary["总流失"].max() * 0.08 else ""
                 ),
                 textposition="inside",
-                textfont=dict(color="#FFFFFF", size=11),
+                textfont=dict(color="#16324F", size=11),
                 hovertemplate="任务类型：%{y}<br>未打开流失：%{x:,.0f} 人<extra></extra>"
             ))
 
@@ -884,8 +895,13 @@ def render_task_student_analysis(
                 y_title=None,
                 legend_title=None,
                 legend_top=True,
-                margin=dict(l=20, r=36, t=20, b=18)
+                margin=dict(l=20, r=36, t=40, b=18)
             )
+            fig_drop.update_layout(title=dict(
+                text="掉链子分析",
+                font=dict(size=14, color="#16324F"),
+                x=0.01, xanchor="left"
+            ))
 
             fig_drop.update_layout(
                 barmode="stack",
@@ -927,10 +943,8 @@ def render_task_student_analysis(
         if fig_drop is None:
             st.info("当前任务类型暂无明显流失数据。")
         else:
-            render_chart_card(
-                fig_drop,
-                title="掉链子分析"
-            )
+            render_chart_card(fig_drop)
+
             if not drop_summary.empty:
                 top_row = drop_summary.iloc[-1]  # 最大流失在最后一行
                 total_loss = int(drop_summary["总流失"].sum())
@@ -939,30 +953,6 @@ def render_task_student_analysis(
                     f"整体流失 {total_loss} 人，其中「{top_row['任务类型']}」流失最严重（{int(top_row['总流失'])} 人），主要集中在"
                     f"{'未打开环节' if top_row['未打开流失'] >= top_row['打开后未完成流失'] else '打开后未完成环节'}。"
                 )
-        # bar_df = plot_summary[["任务类型", "参与率", "参与后完成率"]].copy()
-        # bar_df = bar_df.melt(
-        #     id_vars="任务类型",
-        #     value_vars=["参与率", "参与后完成率"],
-        #     var_name="指标",
-        #     value_name="数值"
-        # )
-        #
-        # fig_bar = px.bar(
-        #     bar_df,
-        #     x="任务类型",
-        #     y="数值",
-        #     color="指标",
-        #     barmode="group",
-        #     category_orders={"指标": ["参与率", "参与后完成率"]},
-        #     color_discrete_map={
-        #         "参与率": COLOR_PRIMARY,
-        #         "参与后完成率": COLOR_SECOND
-        #     }
-        # )
-        # fig_bar = style_figure(fig_bar, x_title="任务类型", y_title="转化率（%）", legend_title="指标",height=340)
-        # fig_bar = beautify_bar_chart(fig_bar)
-        # fig_bar.update_yaxes(range=[0, 100])
-        # show_chart(fig_bar,chart_type="bar",title="任务类型转化对比（Top12）")
 
     with effect_right:
 
@@ -1001,9 +991,36 @@ def render_task_student_analysis(
                     "低参与·高完成": COLOR_WARN,
                     "低参与·低完成": COLOR_DANGER
                 },
-                custom_data=["任务类型", "任务数"]  # ✅关键
+                custom_data=["任务类型", "任务数"]  # ?关键
             )
-            fig_scatter = style_figure(fig_scatter, x_title="参与率（%）", y_title="参与后完成率（%）", legend_title="象限",height=280)
+            fig_scatter = style_figure(
+                fig_scatter,
+                x_title="参与率（%）",
+                y_title="参与后完成率（%）",
+                legend_title="象限",
+                height=300,
+                legend_top=False
+            )
+            fig_scatter.update_layout(
+                margin=dict(l=34, r=28, t=20, b=80),
+                title=dict(
+                    text="任务类型效果象限图",
+                    font=dict(size=14, color="#16324F"),
+                    x=0.01,
+                    xanchor="left",
+                    y=0.97,
+                    yanchor="top"
+                ),
+                legend=dict(
+                    orientation="h",
+                    y=-0.22,
+                    x=0.5,
+                    xanchor="center",
+                    yanchor="top",
+                    font=dict(size=11),
+                    bgcolor="rgba(0,0,0,0)"
+                )
+            )
             fig_scatter.update_traces(
                 hovertemplate=(
                     "任务类型：%{customdata[0]}<br>"
@@ -1017,18 +1034,18 @@ def render_task_student_analysis(
                 x=x_mid,
                 line_width=1.2,
                 line_dash="dash",
-                line_color="rgba(255,255,255,0.35)"
+                line_color="rgba(22, 50, 79, 0.35)"
             )
             fig_scatter.add_hline(
                 y=y_mid,
                 line_width=1.2,
                 line_dash="dash",
-                line_color="rgba(255,255,255,0.35)"
+                line_color="rgba(22, 50, 79, 0.35)"
             )
             fig_scatter.update_xaxes(range=[0, 100])
             fig_scatter.update_yaxes(range=[0, 100])
 
-            show_chart(fig_scatter,chart_type="scatter",height=320,title="任务类型效果象限图")
+            show_chart(fig_scatter, chart_type="scatter", height=320)
             st.caption(f"划分口径：参与率中位数 {x_mid:.1f}%｜参与后完成率中位数 {y_mid:.1f}%")
 
     st.markdown("---")
@@ -1063,7 +1080,7 @@ margin:0 0;
     # ===============================
     # 五、学生行为与学习质量（同一行）
     # ===============================
-    st.markdown("## 👨‍🎓 学生层分析")
+    st.markdown("### 👨‍🎓学生层分析")
 
     student_cur = df_student_cur.copy()
 
@@ -1090,6 +1107,12 @@ margin:0 0;
         values="人数",
         hole=0.55
     )
+    fig_status = fix_pie(fig_status)
+    fig_status.update_layout(title=dict(
+        text="学员任务状态",
+        font=dict(size=14, color="#16324F"),
+        x=0.01, xanchor="left", y=0.97, yanchor="top"
+    ), margin=dict(l=12, r=12, t=50, b=34))
 
 
 
@@ -1142,8 +1165,7 @@ margin:0 0;
     with col1:
         show_chart(
             fig_status,
-            chart_type="pie",
-            title="学员任务状态"
+            chart_type="pie"
         )
 
     with col2:
@@ -1237,7 +1259,12 @@ margin:0 0;
             except Exception:
                 pass
 
-            render_chart_card(fig_acc, title="正确率分布")
+            fig_acc.update_layout(title=dict(
+                text="正确率分布",
+                font=dict(size=14, color="#16324F"),
+                x=0.01, xanchor="left"
+            ), margin=dict(l=26, r=26, t=50, b=20))
+            render_chart_card(fig_acc)
 
     with col3:
         if work_summary.empty:
@@ -1317,300 +1344,9 @@ margin:0 0;
             except Exception:
                 pass
 
-            render_chart_card(fig_work, title="做题数分布")
-    # # ===============================
-    # # 五、学生行为分析
-    # # ===============================
-    # st.markdown("## 👨‍🎓 学生行为分析")
-    #
-    # student_cur = df_student_cur.copy()
-    #
-    # if "学员任务状态" in student_cur.columns:
-    #     student_cur["学员任务状态"] = (
-    #         student_cur["学员任务状态"]
-    #         .fillna("未知")
-    #         .astype(str)
-    #         .str.strip()
-    #         .replace("", "未知")
-    #     )
-    # else:
-    #     student_cur["学员任务状态"] = "未知"
-    #
-    # behavior_left, behavior_right = st.columns(2, gap="large")
-    #
-    # with behavior_left:
-    #
-    #     status_df = student_cur["学员任务状态"].value_counts().reset_index()
-    #     status_df.columns = ["学员任务状态", "人数"]
-    #
-    #     fig_status = px.pie(
-    #         status_df,
-    #         names="学员任务状态",
-    #         values="人数",
-    #         hole=0.55
-    #     )
-    #     fig_status = fix_pie(fig_status)
-    #     show_chart(fig_status,chart_type="pie",title="学员任务状态分布")
-    #
-    #     total_students = status_df["人数"].sum()
-    #     if total_students > 0:
-    #         done_cnt = 0
-    #         for candidate in ["已完成", "完成", "已提交"]:
-    #             if candidate in status_df["学员任务状态"].values:
-    #                 done_cnt += status_df.loc[status_df["学员任务状态"] == candidate, "人数"].sum()
-    #
-    #         done_rate = done_cnt / total_students * 100
-    #         st.metric("完成率 KPI", f"{done_rate:.1f}%")
-    #
-    # with behavior_right:
-    #
-    #     if "任务类型" not in df_task_cur.columns:
-    #         st.info("任务数据中缺少【任务类型】字段，暂无法展示掉链子分析。")
-    #     else:
-    #         drop_df = df_task_cur.copy()
-    #         drop_df["任务类型"] = drop_df["任务类型"].fillna("未知").astype(str).str.strip()
-    #
-    #         for col in ["接收任务学生数", "打开任务学生数", "完成任务学生数"]:
-    #             if col in drop_df.columns:
-    #                 drop_df[col] = pd.to_numeric(drop_df[col], errors="coerce").fillna(0)
-    #             else:
-    #                 drop_df[col] = 0
-    #
-    #         drop_summary = (
-    #             drop_df.groupby("任务类型", as_index=False)
-    #             .agg({
-    #                 "接收任务学生数": "sum",
-    #                 "打开任务学生数": "sum",
-    #                 "完成任务学生数": "sum"
-    #             })
-    #         )
-    #
-    #         drop_summary["未打开流失"] = (
-    #                 drop_summary["接收任务学生数"] - drop_summary["打开任务学生数"]
-    #         ).clip(lower=0)
-    #
-    #         drop_summary["打开后未完成流失"] = (
-    #                 drop_summary["打开任务学生数"] - drop_summary["完成任务学生数"]
-    #         ).clip(lower=0)
-    #
-    #         drop_summary["总流失"] = (
-    #                 drop_summary["未打开流失"] + drop_summary["打开后未完成流失"]
-    #         )
-    #
-    #         drop_summary = (
-    #             drop_summary.sort_values("总流失", ascending=False)
-    #             .head(10)
-    #             .sort_values("总流失", ascending=True)
-    #             .reset_index(drop=True)
-    #         )
-    #
-    #         if drop_summary.empty or drop_summary["总流失"].sum() == 0:
-    #             st.info("当前任务类型暂无明显流失数据。")
-    #         else:
-    #             fig_drop = go.Figure()
-    #
-    #             # 1) 底层：未打开流失
-    #             fig_drop.add_trace(go.Bar(
-    #                 y=drop_summary["任务类型"],
-    #                 x=drop_summary["未打开流失"],
-    #                 name="未打开流失",
-    #                 orientation="h",
-    #                 marker=dict(
-    #                     color=COLOR_WARN,
-    #                     line=dict(width=0)
-    #                 ),
-    #                 text=drop_summary["未打开流失"].apply(
-    #                     lambda x: f"{int(x)}" if x >= drop_summary["总流失"].max() * 0.08 else ""
-    #                 ),
-    #                 textposition="inside",
-    #                 textfont=dict(color="#FFFFFF", size=11),
-    #                 hovertemplate=(
-    #                     "任务类型：%{y}<br>"
-    #                     "未打开流失：%{x:,.0f} 人<extra></extra>"
-    #                 )
-    #             ))
-    #
-    #             # 2) 上层：打开后未完成流失
-    #             fig_drop.add_trace(go.Bar(
-    #                 y=drop_summary["任务类型"],
-    #                 x=drop_summary["打开后未完成流失"],
-    #                 name="打开后未完成流失",
-    #                 orientation="h",
-    #                 marker=dict(
-    #                     color=COLOR_DANGER,
-    #                     line=dict(width=0)
-    #                 ),
-    #                 text=drop_summary["打开后未完成流失"].apply(
-    #                     lambda x: f"{int(x)}" if x >= drop_summary["总流失"].max() * 0.08 else ""
-    #                 ),
-    #                 textposition="inside",
-    #                 textfont=dict(color="#FFFFFF", size=11),
-    #                 hovertemplate=(
-    #                     "任务类型：%{y}<br>"
-    #                     "打开后未完成流失：%{x:,.0f} 人<extra></extra>"
-    #                 )
-    #             ))
-    #
-    #             # 3) 右侧总流失标签
-    #             fig_drop.add_trace(go.Scatter(
-    #                 y=drop_summary["任务类型"],
-    #                 x=drop_summary["总流失"] * 1.015,
-    #                 mode="text",
-    #                 text=drop_summary["总流失"].apply(lambda x: f"{int(x)}"),
-    #                 textfont=dict(color=TEXT_COLOR, size=11),
-    #                 textposition="middle right",
-    #                 showlegend=False,
-    #                 hoverinfo="skip"
-    #             ))
-    #
-    #             max_total = drop_summary["总流失"].max()
-    #
-    #             fig_drop = make_chart_pretty(
-    #                 fig_drop,
-    #                 chart_type="hbar",
-    #                 height=280,
-    #                 x_title=None,
-    #                 y_title=None,
-    #                 legend_title=None,
-    #                 legend_top=True,
-    #                 margin=dict(l=20, r=36, t=20, b=18)
-    #             )
-    #
-    #             fig_drop.update_layout(
-    #                 barmode="stack",
-    #                 bargap=0.34,
-    #                 bargroupgap=0.08,
-    #                 legend=dict(
-    #                     title=None,
-    #                     orientation="h",
-    #                     yanchor="bottom",
-    #                     y=1.03,
-    #                     xanchor="right",
-    #                     x=1,
-    #                     font=dict(size=11),
-    #                     bgcolor="rgba(0,0,0,0)"
-    #                 )
-    #             )
-    #
-    #             fig_drop.update_xaxes(
-    #                 range=[0, max_total * 1.15],
-    #                 showgrid=True,
-    #                 gridcolor="rgba(255,255,255,0.06)",
-    #                 zeroline=False,
-    #                 tickfont=dict(color=SUB_TEXT_COLOR, size=11),
-    #                 separatethousands=True
-    #             )
-    #
-    #             fig_drop.update_yaxes(
-    #                 showgrid=False,
-    #                 tickfont=dict(color=TEXT_COLOR, size=12),
-    #                 automargin=True
-    #             )
-    #
-    #             try:
-    #                 fig_drop.update_traces(marker_line_width=0, cliponaxis=False)
-    #                 fig_drop.update_layout(barcornerradius=999)
-    #             except Exception:
-    #                 pass
-    #
-    #             render_chart_card(
-    #                 fig_drop,
-    #                 title="掉链子分析（按任务类型）"
-    #             )
-    #
-    # # ===============================
-    # # 五、学习质量与老师反馈（按需渲染）
-    # # ===============================
-    # with st.expander("📊 学习质量与老师反馈（点击展开）", expanded=False):
-    #     quality_left, quality_right = st.columns(2, gap="large")
-    #
-    #     # =========================
-    #     # 左：正确率分布（饼图）
-    #     # =========================
-    #     with quality_left:
-    #         st.markdown("#### 正确率分布")
-    #
-    #         if "正确率" not in student_cur.columns:
-    #             st.info("学生数据中缺少【正确率】字段，暂时无法展示正确率分布。")
-    #         else:
-    #             acc_df = student_cur.copy()
-    #             acc_df["正确率区间"] = acc_df["正确率"].apply(_build_accuracy_band)
-    #
-    #             acc_summary = (
-    #                 acc_df["正确率区间"]
-    #                 .value_counts()
-    #                 .reindex(
-    #                     ["优秀（90-100）", "良好（70-89）", "一般（50-69）", "较差（0-49）", "缺失"],
-    #                     fill_value=0
-    #                 )
-    #                 .reset_index()
-    #             )
-    #             acc_summary.columns = ["正确率区间", "人数"]
-    #
-    #             fig_acc = px.pie(
-    #                 acc_summary,
-    #                 names="正确率区间",
-    #                 values="人数",
-    #                 hole=0.55
-    #             )
-    #
-    #             show_chart(
-    #                 fig_acc,
-    #                 chart_type="pie",
-    #                 title="正确率分布"
-    #             )
-    #
-    #     # =========================
-    #     # 右：做题数分布（饼图）
-    #     # =========================
-    #     with quality_right:
-    #         st.markdown("#### 做题数分布")
-    #
-    #         if "做题数" not in student_cur.columns:
-    #             st.info("学生数据中缺少【做题数】字段，暂时无法展示做题数分布。")
-    #         else:
-    #             work_df = student_cur.copy()
-    #             work_df["做题数"] = pd.to_numeric(work_df["做题数"], errors="coerce").fillna(0)
-    #
-    #             bins = [-1, 0, 5, 10, 20, 50, 999999]
-    #             labels = ["0题", "1-5题", "6-10题", "11-20题", "21-50题", "50题以上"]
-    #             work_df["做题数区间"] = pd.cut(work_df["做题数"], bins=bins, labels=labels)
-    #
-    #             work_summary = (
-    #                 work_df["做题数区间"]
-    #                 .value_counts()
-    #                 .reindex(labels, fill_value=0)
-    #                 .reset_index()
-    #             )
-    #             work_summary.columns = ["做题数区间", "人数"]
-    #
-    #             fig_work = px.pie(
-    #                 work_summary,
-    #                 names="做题数区间",
-    #                 values="人数",
-    #                 hole=0.55
-    #             )
-    #
-    #             show_chart(
-    #                 fig_work,
-    #                 chart_type="pie",
-    #                 title="做题数分布"
-    #             )
-
-        # st.markdown("### 💬 老师反馈深度")
-        #
-        # feedback_left, feedback_right = st.columns(2)
-        #
-        # with feedback_left:
-        #     if "有评语" in student_cur.columns and len(student_cur) > 0:
-        #         comment_rate = student_cur["有评语"].mean() * 100
-        #         st.metric("评语覆盖率", f"{comment_rate:.1f}%")
-        #     else:
-        #         st.info("暂无评语数据。")
-        #
-        # with feedback_right:
-        #     if "有评星" in student_cur.columns and len(student_cur) > 0:
-        #         star_rate = student_cur["有评星"].mean() * 100
-        #         st.metric("评星覆盖率", f"{star_rate:.1f}%")
-        #     else:
-        #         st.info("暂无评星数据。")
+            fig_work.update_layout(title=dict(
+                text="做题数分布",
+                font=dict(size=14, color="#16324F"),
+                x=0.01, xanchor="left"
+            ), margin=dict(l=20, r=20, t=50, b=20))
+            render_chart_card(fig_work)
